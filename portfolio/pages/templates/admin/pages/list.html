@@ -1,0 +1,115 @@
+{% extends 'admin/base.html' %} {# Assumes your admin base template #}
+
+{% block title %}{{ page_title or 'Manage Pages' }}{% endblock %}
+{% block mobile_title %}Manage Pages{% endblock %}
+{% block body_class %}page-admin-page-list{% endblock %}
+
+{% block head_css %}
+{{ super() }}
+<style>
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">{{ page_title or 'Manage Pages' }}</h1>
+    
+    {# Breadcrumbs #}
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active">Pages</li>
+    </ol>
+
+    {# "Create New" Button #}
+    <div class="mb-3">
+        <a href="{{ url_for('pages.create_page') }}" class="btn btn-success">
+            <i class="fas fa-plus me-1"></i> Create New Page
+        </a>
+    </div>
+
+    {# Flash Messages #}
+    {% include '_flash_messages.html' %} 
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header">
+            <i class="fas fa-file-alt me-1"></i>
+            Dynamic Pages List
+        </div>
+        <div class="card-body">
+            <div class="table-responsive"> 
+                <table id="pagesTable" class="table table-bordered table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Title</th>
+                            <th>Slug (URL)</th>
+                            <th class="text-center">Visible</th>
+                            <th class="text-center">Order</th>
+                            <th>Last Updated</th>
+                            <th class="text-center" style="width: 110px;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if pages %}
+                            {% for page in pages %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('pages.edit_page', id=page.id) }}" class="fw-bold">{{ page.title }}</a>
+                                    {% if page.is_visible %}
+                                      <a href="{{ url_for('main.page_detail', slug=page.slug) if page.slug not in ['about', 'contact'] else url_for('main.'+page.slug) }}" 
+                                         target="_blank" class="ms-2 small" title="View Public Page">
+                                         <i class="fas fa-external-link-alt fa-xs text-muted"></i>
+                                      </a>
+                                    {% endif %}
+                                </td>
+                                <td>/{{ page.slug }}</td>
+                                <td class="text-center">
+                                    {% if page.is_visible %}
+                                        <span class="badge bg-success">Yes</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">No</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">{{ page.display_order }}</td>
+                                <td class="small text-muted">
+                                     {{ page.updated_at.strftime('%Y-%m-%d') if page.updated_at else '--' }}<br>
+                                     {{ page.updated_at.strftime('%H:%M') if page.updated_at else '' }}
+                                </td>
+                                <td class="text-center">
+                                    <a href="{{ url_for('pages.edit_page', id=page.id) }}" class="btn btn-sm btn-outline-primary me-1" title="Edit Page">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form action="{{ url_for('pages.delete_page', id=page.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete the page \'{{ page.title|escape }}\'? This action cannot be undone.');">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Page">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted fst-italic py-4">No dynamic pages found.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }} 
+{% endblock %}

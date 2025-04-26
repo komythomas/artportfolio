@@ -1,0 +1,107 @@
+{% extends 'admin/base.html' %}
+{% from "_form_macros.html" import render_field_with_errors, render_file_field %} 
+
+{% block title %}Site Settings{% endblock %}
+{% block mobile_title %}Settings{% endblock %}
+{% block body_class %}page-admin-settings{% endblock %}
+
+{% block head_css %}
+{{ super() }}
+<style>
+
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">Site Settings</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active">Site Settings</li>
+    </ol>
+
+    {# Flash Messages #}
+    {% include '_flash_messages.html' %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('settings.manage_settings') }}" enctype="multipart/form-data" novalidate>
+        {{ form.hidden_tag() }} {# CSRF Protection #}
+        
+        <div class="row g-4">
+
+            {# Colonne 1 : General & Branding #}
+            <div class="col-lg-6">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header"><i class="fas fa-info-circle me-1"></i>General Site Info</div>
+                    <div class="card-body">
+                        {{ render_field_with_errors(form.site_name, class_="form-control") }} 
+                    </div>
+                </div>
+
+                <div class="card mb-4 shadow-sm">
+                     <div class="card-header"><i class="fas fa-image me-1"></i>Branding Images</div>
+                     <div class="card-body">
+                        {{ render_file_field(form.logo, current_images.get('logo'), 'Current Logo') }}
+                        <hr class="my-3">
+                        {{ render_file_field(form.favicon, current_images.get('favicon'), 'Current Favicon') }}
+                     </div>
+                </div>
+
+                <div class="card mb-4 shadow-sm">
+                     <div class="card-header"><i class="fas fa-images me-1"></i>Page Images</div>
+                     <div class="card-body">
+                         {{ render_file_field(form.home_background, current_images.get('home_background'), 'Current Homepage Background') }}
+                         <hr class="my-3">
+                         {{ render_file_field(form.artist_portrait, current_images.get('artist_portrait'), 'Current Artist Portrait') }}
+                     </div>
+                </div>
+            </div>
+
+            {# Colonne 2 : Contact/Social, SEO/Analytics, Footer #}
+            <div class="col-lg-6">
+                 <div class="card mb-4 shadow-sm">
+                     <div class="card-header"><i class="fas fa-address-book me-1"></i>Contact & Social Media</div>
+                     <div class="card-body">
+                         {{ render_field_with_errors(form.contact_email, class_="form-control", type="email") }}
+                         {{ render_field_with_errors(form.contact_phone, class_="form-control") }}
+                         {{ render_field_with_errors(form.contact_address, class_="form-control", rows="3") }}
+                         <hr class="my-3">
+                         {{ render_field_with_errors(form.instagram_url, class_="form-control", type="url", placeholder="https://instagram.com/...") }}
+                         {{ render_field_with_errors(form.linkedin_url, class_="form-control", type="url", placeholder="https://linkedin.com/in/...") }}
+                         {{ render_field_with_errors(form.facebook_url, class_="form-control", type="url", placeholder="https://facebook.com/...") }}
+                     </div>
+                 </div>
+
+                 <div class="card mb-4 shadow-sm">
+                    <div class="card-header"><i class="fas fa-chart-line me-1"></i>SEO & Analytics</div>
+                    <div class="card-body">
+                        {{ render_field_with_errors(form.meta_description, class_="form-control", rows="4") }}
+                         <hr class="my-3">
+                        {{ render_field_with_errors(form.analytics_script, class_="form-control", rows="6") }}
+                    </div>
+                 </div>
+
+                 <div class="card mb-4 shadow-sm">
+                    <div class="card-header"><i class="fas fa-copyright me-1"></i>Footer</div>
+                    <div class="card-body">
+                         {{ render_field_with_errors(form.copyright_text, class_="form-control", placeholder="Default: © [Year] [Site Name]") }}
+                    </div>
+                 </div>
+            </div>
+        </div>
+
+        <div class="text-center mt-3">
+            {{ form.submit(class="btn btn-primary btn-lg px-5") }}
+        </div>
+    </form>
+</div>
+{% endblock %}

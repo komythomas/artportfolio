@@ -1,0 +1,49 @@
+{% extends "base.html" %} 
+
+{% block title %}Admin Login{% endblock %}
+{% block body_class %}page-admin-login bg-light d-flex align-items-center justify-content-center min-vh-100{% endblock %}
+
+{% block navbar %}{% endblock %} 
+{% block footer %}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-sm border-0 rounded-lg">
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h3 class="my-0"><i class="fas fa-lock me-2"></i>Admin Login</h3>
+                </div>
+                <div class="card-body p-4">
+                    {# Affichage des messages flash #}
+                    {% include '_flash_messages.html' %}
+                    
+                    <form method="post" novalidate>
+                        
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" id="username" name="username" class="form-control form-control-lg" placeholder="Enter your username" required autofocus>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" id="password" name="password" class="form-control form-control-lg" placeholder="Enter your password" required>
+                        </div>
+                        <div class="d-grid mt-4">
+                            <input type="submit" value="Login" class="btn btn-primary btn-lg">
+                        </div>
+                    </form>
+                </div>
+                {# Optionnel: Lien "Mot de passe oublié ?" ou retour au site #}
+                {# <div class="card-footer text-center py-3">
+                    <a href="{{ url_for('main.home') }}">Back to site</a>
+                </div> #}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{# Pas besoin de scripts spécifiques ici généralement #}
+{{ super() }}
+{% endblock %}

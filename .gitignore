@@ -1,0 +1,51 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+
+# C extensions
+*.so
+*.pyd
+
+# Virtual environment
+venv/
+env/
+*.env
+
+# Flask cache and session files
+instance/
+*.sqlite3
+*.db
+*.db-journal
+*.sqlite
+
+# Logs
+*.log
+logs/
+logfile.log
+
+
+# IDE-specific files
+.vscode/
+.idea/
+.conda/
+*.swp
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+
+# Python egg files
+*.egg
+*.egg-info/
+dist/
+build/
+*.manifest
+*.spec
+
+
+# Migrations
+.qodo
+.vercel

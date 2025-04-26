@@ -1,0 +1,91 @@
+{# portfolio/main/templates/main/gallery.html #}
+{% extends "base.html" %}
+{% from "_macros.html" import render_pagination %} {# Importer pagination #}
+
+{% block title %}{{ page_title or "Gallery" }} - {{ site_settings.get('site_name', 'Portfolio') }}{% endblock %}
+{% block mobile_title %}{{ page_title or "Gallery" }}{% endblock %}
+
+{# Ajouter la classe body pour appliquer les styles de grille spécifiques #}
+{% block body_class %}page-work-grid{% endblock %}
+
+{% block head_css %}
+    {{ super() }}
+    {# Pas besoin de CSS spécifique ici si style.css contient bien 
+       les règles pour .page-work-grid et .project-card-minimal-masonry #}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-4 px-md-3 px-2 my-4 my-md-5"> {# Full width avec padding #}
+
+    <h1 class="page-title mb-4">{{ page_title or "Gallery" }}</h1>
+
+    {# Flash messages si besoin #}
+    {% include '_flash_messages.html' %} 
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {# Boucle pour afficher messages flash ici #}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {# Optionnel: Afficher contenu dynamique si la page "Gallery" existe #}
+    {# ... (code commenté pour contenu dynamique) ... #}
+    
+    {# La grille des projets #}
+    {% if projects_pagination and projects_pagination.items %}
+        {# --- CONTENEUR POUR BOOTSTRAP MASONRY --- #}
+        {# On utilise row et data-masonry. Les éléments enfants directs seront positionnés. #}
+        {# g-4 ajoute l'espacement (gutter) #}
+        <div class="row g-4 project-grid-minimal" data-masonry='{"percentPosition": true }'>
+            
+            {% for project in projects_pagination.items %}
+                {# Chaque projet est un enfant direct pour Masonry. #}
+                {# On utilise col-md-6 pour spécifier 2 colonnes sur medium et plus grand #}
+                {# mb-4 (ou le gap g-4) assure l'espacement vertical initial #}
+                 <div class="col-md-6"> {# Important: Utiliser classe de colonne Bootstrap #}
+                    <div class="project-card-minimal-masonry"> {# Notre style pour l'intérieur #}
+                        <a href="{{ url_for('main.project_detail', slug=project.slug) }}" 
+                           class="project-card-image-link" 
+                           title="View project: {{ project.title|escape }}">
+                            {# Afficher l'image ou le placeholder #}
+                            {% if project.display_image_path %}
+                                {# Utiliser l'URL directe depuis la BDD (Vercel Blob URL) #}
+                                <img src="{{ project.display_image_path }}" 
+                                     alt="{{ project.title|escape }}" 
+                                     loading="lazy">
+                            {% else %}
+                                <div class="no-image-placeholder"><span>{{ project.title }}</span></div>
+                            {% endif %}
+                        </a>
+                        {# Texte discret sous l'image #}
+                        <div class="project-card-text">
+                            <h3 class="project-card-title">
+                                <a href="{{ url_for('main.project_detail', slug=project.slug) }}">{{ project.title }}</a>
+                            </h3>
+                            {% if project.year %}
+                            <p class="project-card-meta">{{ project.year }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        {# --- FIN CONTENEUR MASONRY --- #}
+
+        {# Pagination #}
+        <div class="mt-5 d-flex justify-content-center">
+            {# Assurer que la macro utilise **kwargs ou que cet appel est correct #}
+            {{ render_pagination(projects_pagination, 'main.gallery') }} 
+        </div>
+
+    {% else %}
+        <p class="text-center text-muted fst-italic mt-5">No projects found in the gallery yet.</p>
+    {% endif %}
+
+</div>
+{% endblock %}

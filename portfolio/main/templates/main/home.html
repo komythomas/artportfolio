@@ -1,0 +1,78 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>HSS - {{ site_settings.get('site_name', 'HSS FineArt') }}</title>
+    <meta name="description" content="{{ site_settings.get('meta_description', 'Portfolio de Hermann Sebastian Schultz') }}">
+    <meta name="author" content="Hermann Sebastian Schultz">
+    
+    {# Favicon dynamique (supprimer le lien codé en dur) #}
+    {% if current_images.favicon %}
+    <link rel="icon" href="{{ current_images.favicon }}" type="image/x-icon">
+  {% else %}
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+  {% endif %}
+
+    {# --- CSS --- #}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        /* (CSS d'origine, inchangé) */
+        html, body { margin:0; padding:0; height:100%; overflow-x:hidden; font-family:"Bahnschrift Condensed","Arial Condensed","Helvetica Neue",sans-serif; font-size:16px; font-weight:400;}
+        .home-page { min-height:100vh; width:100vw; margin:0; padding:0; background-size:cover; background-position:center; background-attachment:fixed; display:flex; align-items:center; justify-content:flex-start; position:relative;}
+        .home-nav { position:absolute; top:30%; left:10%; transform:translateY(-50%); color:white; display:flex; flex-direction:column; gap:30px; z-index:2; padding:1rem;}
+        .home-nav h1 { font-size:clamp(1.5rem,4vw,2.1rem); font-weight:200; font-family:"Bahnschrift Condensed","Arial Condensed","Helvetica Neue",sans-serif; margin:0; color:white; text-transform:uppercase; letter-spacing:2px; text-shadow:1px 1px 3px rgba(0,0,0,0.6);}
+        .home-nav ul { list-style:none; padding:0; margin:0; display:flex; flex-direction:row; gap:25px; flex-wrap:nowrap;}
+        .home-nav ul li a { color:rgba(255,255,255,0.9); text-decoration:none; font-size:clamp(0.9rem,2.5vw,1.2rem); font-weight:100; letter-spacing:1px; transition:color 0.3s; white-space:nowrap; padding-bottom:3px;}
+        .home-nav ul li a:hover { color:#ffffff; border-bottom-color:rgba(255,255,255,0.5);}
+        .home-nav .social-icons { display:flex; gap:15px; align-items:center; justify-content:flex-start; margin-top:0;}
+        .home-nav .social-icons a { color:rgba(255,255,255,0.8); font-size:clamp(1.2rem,3vw,1.5rem); transition:color 0.3s,transform 0.2s; text-decoration:none;}
+        .home-nav .social-icons a:hover { color:#ffffff; transform:scale(1.1);}
+        @media (max-width:991px){.home-nav{left:5%; right:5%; width:auto; top:50%; gap:25px; background-color:rgba(0,0,0,0.01); padding:1.5rem;}}
+        @media (max-width:767px){.home-nav{left:15px; right:15px; top:50%; gap:20px; padding:1rem;}.home-nav h1{font-size:1.4rem;letter-spacing:3px;}.home-nav ul{flex-direction:column;gap:10px;align-items:flex-start;}.home-nav ul li a{font-size:1rem;}.home-nav ul li a:hover{border-bottom-color:transparent;}.home-nav .social-icons{margin-top:5px;}.home-nav .social-icons a{font-size:1.3rem;gap:12px;}}
+        .home-footer{position:fixed;bottom:0;left:0;right:0;padding:0.6rem 1rem;background-color:rgba(0,0,0,0.1);text-align:center;z-index:10;}
+        .home-footer p{margin:0;font-size:0.6rem;color:rgba(255,255,255,0.32);letter-spacing:0.5px;}
+        .home-footer a{color:rgba(255,255,255,0.6);text-decoration:none;}
+        .home-footer a:hover{color:#fff;}
+        @media (max-height:400px),(max-width:360px){.home-footer{display:none;}}
+    </style>
+</head>
+<body>
+    {# Choix dynamique du background selon URL absolue ou chemin dans static #}
+    {% set bg_src = site_settings.get('home_bg_path') or '' %}
+    <div class="home-page"
+        {% if bg_src %}
+            {% if bg_src.startswith('http') %}
+                style="background-image: url('{{ bg_src }}');"
+            {% else %}
+                style="background-image: url('{{ url_for('static', filename=bg_src) }}');"
+            {% endif %}
+        {% else %}
+            style="background-color: #222;"
+        {% endif %}>
+        
+        {# Navigation superposée #}
+        <div class="home-nav">
+            <h1>{{ site_settings.get('site_name', 'Hermann Sebastian Schultz') }}</h1>
+            <ul>
+                {# <li><a href="{{ url_for('main.page_detail', slug='events') }}">CV</a></li> #}
+                <li><a href="{{ url_for('main.about') }}">About</a></li> 
+                <li><a href="{{ url_for('main.gallery') }}">Gallery</a></li> 
+                <li><a href="{{ url_for('main.commissions') }}">Commissions</a></li> 
+                <li><a href="{{ url_for('main.contact') }}">Contact</a></li>
+            </ul>
+            <div class="social-icons">
+                <a href="{{ site_settings.get('instagram_url', '#') }}" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+                <a href="{{ site_settings.get('linkedin_url', '#') }}" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin"></i></a>
+            </div>
+        </div>
+    </div>
+    <footer class="home-footer">
+        <p>&copy; {{ current_year }} {{ site_settings.get('copyright_text', site_settings.get('site_name', 'HSS FineArt')) }}</p>
+    </footer>
+</body>
+</html>

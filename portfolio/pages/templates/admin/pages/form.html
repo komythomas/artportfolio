@@ -1,0 +1,111 @@
+{% extends 'admin/base.html' %}
+{% from "_form_macros.html" import render_field_with_errors, render_file_field %}
+
+{% block title %}{{ page_title }}{% endblock %}
+{% block mobile_title %}{{ page_title }}{% endblock %}
+{% block body_class %}page-admin-page-form{% endblock %}
+
+{% block head_css %}
+{{ super() }}
+{# Le CSS spécifique a été déplacé dans admin_style.css #}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">{{ page_title }}</h1>
+
+    {# Breadcrumbs #}
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('pages.list_pages') }}">Pages</a></li>
+        <li class="breadcrumb-item active">{{ 'New Page' if not page else 'Edit Page' }}</li>
+    </ol>
+
+    {# Flash Messages #}
+    {% include '_flash_messages.html' %} 
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header">
+            <i class="fas fa-file-signature me-1"></i>
+            {{ 'New Page Details' if not page else 'Edit Page Details' }}
+        </div>
+        <div class="card-body">
+            <form method="POST" enctype="multipart/form-data" novalidate>
+                {{ form.hidden_tag() }}
+
+                <div class="row">
+                    {# Main content column #}
+                    <div class="col-md-8"> 
+                        <div class="details-grid">
+                            {{ render_field_with_errors(form.title, class_="form-control form-control-lg", placeholder="Page Title") }}
+                            {{ render_field_with_errors(form.slug, class_="form-control", placeholder="auto-generated-from-title", description="Unique URL identifier (e.g., about-me). Leave blank to auto-generate.") }}
+                        </div>
+                        <div class="mt-3">
+                            {{ render_field_with_errors(form.content, label_visible=true, class_="form-control", rows="20", id="pageContentEditor") }} 
+                        </div>
+                    </div>
+                    
+                    {# Sidebar column for options #}
+                    <div class="col-md-4"> 
+                        <div class="card card-body bg-light sticky-sidebar-options mb-3"> 
+                            <h5 class="mb-3">Options</h5>
+                            {{ render_field_with_errors(form.is_visible) }} 
+                            {{ render_field_with_errors(form.display_order, class_="form-control form-control-sm", type="number", description="Lower numbers appear first.") }}
+                            <hr class="my-3">
+                            <h5 class="mb-3">SEO</h5>
+                            {{ render_field_with_errors(form.meta_description, class_="form-control form-control-sm", rows="4") }}
+                        </div>
+                        <div class="card card-body bg-light sticky-sidebar-options">
+                            <h5 class="mb-3">Cover Image</h5>
+                            {# Display current image if editing, compatible Vercel Blob/static #}
+                            {% set current_cover_image_url = None %}
+                            {% if page and page.cover_image_path %}
+                                {% if page.cover_image_path.startswith('http') %}
+                                    {% set current_cover_image_url = page.cover_image_path %}
+                                {% else %}
+                                    {% set current_cover_image_url = url_for('static', filename=page.cover_image_path) %}
+                                {% endif %}
+                            {% endif %}
+                            {{ render_file_field(form.cover_image, current_cover_image_url, 'Current Image') }}
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="mt-4">
+                <div class="mt-3">
+                    {{ form.submit(class="btn btn-primary px-4", value="Save Page") }}
+                    <a href="{{ url_for('pages.list_pages') }}" class="btn btn-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof tinymce !== 'undefined') { 
+          tinymce.init({
+            selector: '#pageContentEditor',
+            height: 600, menubar: false,
+            plugins: ['advlist','autolink','lists','link','image','charmap','preview','anchor','searchreplace','visualblocks','code','fullscreen','insertdatetime','media','table','help','wordcount'],
+            toolbar: 'undo redo | blocks | bold italic underline | alignleft aligncenter alignright | bullist numlist outdent indent | link image | code | fullscreen | help',
+            content_style: 'body { font-family:Helvetica,Arial,sans-serif; font-size:16px }',
+            entity_encoding: "raw"
+          });
+      } else { console.error("TinyMCE script not loaded."); }
+    });
+</script>
+{% endblock %}

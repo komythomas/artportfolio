@@ -1,0 +1,172 @@
+
+{% extends "base.html" %} {# Utilise votre template de base principal #}
+
+{% block title %}{{ project.title }} - {{ site_settings.get('site_name', 'Portfolio') }}{% endblock %}
+{% block meta_description %}{{ project.meta_description | striptags | truncate(160) if project.meta_description else project.description | striptags | truncate(160) if project.description else site_settings.get('meta_description', '') }}{% endblock %}
+{% block body_class %}page-project-detail page-project-single-column page-align-left page-minimal-text{% endblock %} {# Classe(s) spécifique(s) #}
+
+
+{% block hide_logo %}
+{% set hide_logo = true %}{% endblock %}
+{% block head_css %}
+<style>
+
+    .glightbox-container .gslide-description {
+        background: rgba(0, 0, 0, 0.7) !important; /* Fond légèrement moins opaque? */
+        padding: 5px 10px !important; 
+        text-align: left;
+        border-bottom-left-radius: 3px; /* Arrondir coins */
+        border-bottom-right-radius: 3px;
+    }
+    .glightbox-container .gslide-title {
+        font-size: 0.9rem !important; /* Titre lightbox plus petit */
+        font-weight: 400 !important; color: #eee !important;
+        margin-bottom: 4px !important; padding: 0 !important;
+    }
+    .glightbox-custom-desc { /* Notre conteneur metadata */
+        font-size: 0.75rem !important; /* Très petit */
+        line-height: 1.4 !important;
+        color: rgba(255, 255, 255, 0.65) !important; /* Texte plus pâle */
+    }
+    .glightbox-custom-desc strong {
+        font-weight: 400; /* Labels pas en gras */
+        color: rgba(255, 255, 255, 0.8);
+        margin-right: 0.4em;
+    }
+    .glightbox-custom-desc .d-block { display: block !important; margin-bottom: 1px; }
+    .glightbox-custom-desc .d-block:last-child { margin-bottom: 0; }
+
+</style>
+{{ super() }} 
+{# CSS GLightbox #}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/glightbox/dist/css/glightbox.min.css" />
+{% endblock %}
+
+{% block content %}
+<div class="project-detail-container my-4 my-md-5"> 
+    <article itemscope itemtype="http://schema.org/VisualArtwork">
+
+        {# 1. Titre #}
+        <h1 class="project-title" itemprop="name">{{ project.title }}</h1>
+
+        {# 2. Image Principale #}
+        <div class="project-feature-image mb-4">
+            {% if project.display_image_path %}
+                <a href="{{ project.display_image_path }}" class="glightbox" data-gallery="project-{{ project.id }}" data-title="{{ project.title|escape }}" data-tech="{{ project.techniques or '' }}" data-year="{{ project.year or '' }}">
+                    <img src="{{ project.display_image_path }}" alt="{{ project.title|escape }}" itemprop="image">
+                </a>
+            {% endif %}
+        </div>
+
+        {# 3. Bloc Métadonnées #}
+        <section class="project-metadata-block">
+            <h2 class="visually-hidden"></h2> {# Bloc Details #}
+            <ul>
+                {% if project.categories %}
+                    <li><strong></strong> {% for cat in project.categories %}<span class="badge bg-light text-dark border me-1">{{ cat.name }}</span>{% endfor %}</li>
+                {% endif %}
+                {% if project.year %}<li><strong></strong> {{ project.year }},</li>{% endif %}
+                {% if project.techniques %}<li><strong></strong> {{ project.techniques }}</li>{% endif %}
+                {% if project.collection %}<li><strong>Collection/Series:</strong> {{ project.collection }}</li>{% endif %}
+                {% if project.availability %}
+                    <li><strong>:</strong>
+                        {% if project.availability == 'available' %}
+                            <span class="text-success fw-bold">Available</span>
+                        {% elif project.availability == 'sold' %}
+                            <span class="text-danger fw-bold">Sold</span>
+                        {% elif project.availability == 'on_request' %}
+                            <span>On Request</span>
+                        {% elif project.availability == 'not_for_sale' %}
+                            <span class="text-muted">Not for Sale</span>
+                        {% else %}
+                            <span>{{ project.availability | capitalize }}</span>
+                        {% endif %}
+                    </li>
+                {% endif %}
+                {% if project.tags %}
+                    <li><strong>Tags:</strong>
+                        {% for tag in project.tags %}
+                            <a href="{{ url_for('main.tag_archive', slug=tag.slug) }}" class="badge bg-light text-dark border me-1 mb-1 text-decoration-none">{{ tag.name }}</a>
+                        {% endfor %}
+                    </li>
+                {% endif %}
+            </ul>
+        </section>
+
+        {# 4. Description #}
+        {% if project.description %}
+        <section class="project-description content-body" itemprop="description">
+            <h2 class="visually-hidden"></h2> {# Bloc Description #}
+            {{ project.description | safe }}
+        </section>
+        {% endif %}
+
+        {# 5. Détails NFT (Conditionnel) #}
+        {% if project.is_nft %}
+        <section class="project-metadata-block project-nft-details mb-4"> 
+            {# ... contenu NFT ... #}
+        </section>
+        {% endif %}
+
+        {# 6. Images Associées (Items) sans doublon de l’image principale #}
+        {% set additional_items = project.items | selectattr('file_path', 'ne', project.display_image_path) | list %}
+        {% if additional_items %}
+        <section class="project-items-section mt-5">
+            <h2 class="h4 mb-4 border-top pt-4"></h2> {# Bloc Additional Views / Details #}
+            <div class="project-items-list"> 
+                {% for item in additional_items %}
+                    <a href="{{ item.file_path }}"
+                        class="glightbox" 
+                        data-gallery="project-{{ project.id }}"
+                        data-title="{{ item.alt_text or project.title | escape }}"
+                        {% if item.width and item.height %}
+                        data-width="{{ item.width }}"
+                        data-height="{{ item.height }}"
+                        {% endif %}
+                        data-tech="{{ project.techniques or '' }}" 
+                        data-year="{{ project.year or '' }}"> 
+                        <img src="{{ item.file_path }}"
+                             class="img-fluid mb-4 shadow-sm" 
+                             alt="{{ item.alt_text or 'Additional view for ' + project.title|escape }}"
+                             loading="lazy"> 
+                    </a>
+                {% endfor %}
+            </div>
+        </section>
+        {% endif %}
+
+    </article>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }} 
+<script src="https://cdn.jsdelivr.net/gh/mcstudios/glightbox/dist/js/glightbox.min.js"></script>
+<script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', function() {
+        const lightbox = GLightbox({
+            loop: true, 
+            zoomable: true, 
+            draggable: true, 
+            touchNavigation: true, 
+            keyboardNavigation: true, 
+            skin: 'glightbox-clean', 
+            
+            maxScale: 5
+            
+            title: function (element) { return element.getAttribute('data-title') || ''; },
+            description: function (element) { 
+                const tech = element.getAttribute('data-tech');
+                const year = element.getAttribute('data-year');
+                let descHtml = '<div class="glightbox-custom-desc">'; 
+                let hasContent = false;
+                if (tech) { descHtml += `<span class="d-block"><strong>Techniques:</strong> ${tech}</span>`; hasContent = true; }
+                if (year) { descHtml += `<span class="d-block"><strong>Year:</strong> ${year}</span>`; hasContent = true; }
+                descHtml += '</div>';
+                return hasContent ? descHtml : null; 
+            }
+        }); 
+    }); 
+</script>
+</script>
+{% endblock %}

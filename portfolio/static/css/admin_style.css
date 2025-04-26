@@ -1,0 +1,746 @@
+/* static/css/admin_style.css */
+/* Styles harmonisés pour l'ensemble du dashboard Administration */
+
+/* 1. Variables & Base
+-------------------------------------------------- */
+:root {
+    --admin-font-sans-serif: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", "Noto Sans", "Liberation Sans", Arial, sans-serif;
+    --admin-body-bg: #f1f3f5;
+    --admin-body-color: #343a40;
+    --admin-heading-color: #212529;
+    --admin-border-color: #dee2e6;
+    --admin-card-bg: #ffffff;
+    --admin-card-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    --admin-card-shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --admin-border-radius: 0.375rem;
+    --admin-primary: #0d6efd;
+    --admin-primary-rgb: 13,110,253;
+    --admin-link-color: var(--admin-primary);
+    --admin-link-hover-color: #0a58ca;
+    --admin-bg-light: #f8fafc;
+}
+
+/* --- Unification de la largeur des pages admin --- */
+.page-admin .container-fluid,
+.page-admin-dashboard .container-fluid,
+.page-admin-project-form .container-fluid,
+.page-admin-project-list .container-fluid,
+.page-admin-page-form .container-fluid,
+.page-admin-page-list .container-fluid,
+.page-admin.page-admin-media-library .container-fluid {
+    max-width: 1600px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+@media (max-width: 991px) {
+    .page-admin .container-fluid,
+    .page-admin-dashboard .container-fluid,
+    .page-admin-project-form .container-fluid,
+    .page-admin-project-list .container-fluid,
+    .page-admin-page-form .container-fluid,
+    .page-admin-page-list .container-fluid,
+    .page-admin-media-library .container-fluid {
+        max-width: 100%;
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+}
+@media (min-width: 992px) {
+    .page-admin .container-fluid,
+    .page-admin-dashboard .container-fluid,
+    .page-admin-project-form .container-fluid,
+    .page-admin-project-list .container-fluid,
+    .page-admin-page-form .container-fluid,
+    .page-admin-page-list .container-fluid,
+    .page-admin-media-library .container-fluid {
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+}
+
+/* 2. Layout Principal & Navbar
+-------------------------------------------------- */
+body.page-admin {
+    background-color: var(--admin-body-bg);
+    font-family: var(--admin-font-sans-serif);
+    color: var(--admin-body-color);
+    font-size: 0.95rem;
+}
+.admin-navbar {
+    background-color: var(--admin-card-bg);
+    box-shadow: var(--admin-card-shadow);
+    padding-top: 0.6rem; padding-bottom: 0.6rem;
+}
+.admin-navbar .navbar-brand { font-weight: 500; font-size: 1.1rem; }
+.admin-navbar .nav-link { font-size: 0.9rem; padding: 0.4rem 0.8rem; color: #495057; }
+.admin-navbar .nav-link.active { font-weight: 500; color: var(--admin-primary); }
+.admin-navbar .nav-link:hover { color: var(--admin-link-hover-color); }
+.admin-navbar .dropdown-menu { font-size: 0.9rem; }
+
+.main-admin-content {
+    padding-top: calc(56px + 2rem);
+    padding-bottom: 4rem;
+    align-content: center;
+    max-width: 100%;
+}
+
+
+/* 3. Typographie Admin
+-------------------------------------------------- */
+.page-admin h1, .page-admin .h1 { font-size: 1.8rem; font-weight: 500; color: var(--admin-heading-color); margin-bottom: 0.5rem; }
+.page-admin h2, .page-admin .h2 { font-size: 1.4rem; font-weight: 500; margin-top: 2rem; margin-bottom: 1rem; color: var(--admin-heading-color); }
+.page-admin h3, .page-admin .h3 { font-size: 1.2rem; font-weight: 500; margin-top: 1.8rem; margin-bottom: 0.8rem; }
+.page-admin h4, .page-admin .h4 { font-size: 1.1rem; font-weight: 500; margin-top: 1.5rem; margin-bottom: 0.7rem; }
+.page-admin h5, .page-admin .h5 { font-size: 1rem; font-weight: 500; }
+
+.page-admin .breadcrumb { background-color: transparent; padding: 0; margin-bottom: 1.5rem; font-size: 0.85rem; }
+.page-admin hr { border-top-color: var(--admin-border-color); opacity: 0.5; }
+.page-admin .text-muted { color: #6c757d !important; }
+.page-admin .small { font-size: 0.85em; }
+
+/* 4. Cartes Admin (Style Général)
+-------------------------------------------------- */
+.page-admin .card {
+    border: 1px solid var(--admin-border-color);
+    border-radius: var(--admin-border-radius);
+    box-shadow: var(--admin-card-shadow);
+    margin-bottom: 1.5rem;
+    background-color: var(--admin-card-bg);
+}
+.page-admin .card-header {
+    background-color: var(--admin-bg-light);
+    border-bottom: 1px solid var(--admin-border-color);
+    padding: 0.8rem 1.25rem;
+    font-weight: 500;
+    font-size: 1rem;
+    color: var(--admin-heading-color);
+}
+.page-admin .card-header i { color: #6c757d; margin-right: 0.5rem; }
+.page-admin .card-body { padding: 1.25rem; }
+.page-admin .card-footer { background-color: var(--admin-bg-light); border-top: 1px solid var(--admin-border-color); padding: 0.75rem 1.25rem; }
+
+/* 5. Formulaires Admin (Général)
+-------------------------------------------------- */
+.page-admin form label.form-label { font-weight: 500; font-size: 0.9rem; margin-bottom: 0.4rem; color: var(--admin-heading-color); }
+.page-admin form .form-text { font-size: 0.8rem; color: #6c757d; margin-top: 0.3rem; }
+.page-admin form .form-control,
+.page-admin form .form-select {
+    font-size: 0.95rem;
+    border-color: var(--admin-border-color);
+    transition: border-color .2s ease-in-out, box-shadow .2s ease-in-out;
+    border-radius: 0.3rem;
+}
+.page-admin form .form-control:focus,
+.page-admin form .form-select:focus {
+    border-color: var(--admin-primary);
+    box-shadow: 0 0 0 0.2rem rgba(var(--admin-primary-rgb), 0.15);
+}
+.page-admin form .form-control-sm,
+.page-admin form .form-select-sm { font-size: 0.85rem; }
+
+.page-admin .tagify { border-color: var(--admin-border-color); border-radius: 0.3rem; }
+.page-admin .tagify:focus-within { border-color: var(--admin-primary); box-shadow: 0 0 0 0.2rem rgba(var(--admin-primary-rgb), 0.15); }
+
+.page-admin .tox-tinymce { border-radius: 0.3rem !important; border-color: var(--admin-border-color) !important; }
+.page-admin .tox:focus-within { box-shadow: 0 0 0 0.2rem rgba(var(--admin-primary-rgb), 0.15); border-color: var(--admin-primary) !important; }
+
+.form-image-preview img { border: 1px solid var(--admin-border-color); border-radius: var(--admin-border-radius); background-color: #fff; padding: 5px; margin-top: 5px; max-height: 120px !important; }
+.form-image-preview small { font-size: 0.8rem; color: #6c757d; }
+
+.form-actions { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--admin-border-color); text-align: right; }
+.form-actions .btn { min-width: 100px; margin-left: 0.5rem; }
+
+/* 6. Tableaux Admin (Listes)
+-------------------------------------------------- */
+.page-admin .table {
+    border-color: var(--admin-border-color);
+    font-size: 0.9rem;
+}
+.page-admin .table thead th { font-weight: 500; background-color: var(--admin-bg-light); border-bottom-width: 1px; white-space: nowrap; font-size: 0.85rem; }
+.page-admin .table tbody td { vertical-align: middle; }
+.page-admin .table-hover tbody tr:hover { background-color: rgba(0,0,0,0.03); }
+.page-admin .table td a { font-weight: 500; }
+.page-admin .table .badge { font-size: 0.8em; font-weight: 500; vertical-align: middle;}
+.page-admin .table .btn-sm { padding: 0.15rem 0.4rem; font-size: 0.8rem; }
+.page-admin .table .action-cell { white-space: nowrap; width: 1%; }
+
+/* 7. Media Library Spécifique
+-------------------------------------------------- */
+.page-admin-media-library .media-card .card-img-top { aspect-ratio: 4 / 3; object-fit: cover; border-bottom: 1px solid var(--admin-border-color); }
+.page-admin-media-library .media-card .card-body { font-size: 0.75rem; overflow-wrap: break-word; padding: 0.5rem 0.75rem;}
+.page-admin-media-library .media-card .card-footer { background-color: #fdfdfd; padding: 0.5rem 0.75rem; border-top: 1px solid var(--admin-border-color); }
+.page-admin-media-library .media-card .btn-delete-item { padding: 0.1rem 0.4rem; font-size: 0.75rem; }
+
+/* 8. Layouts Spécifiques Harmonisés (Projects, Pages, Settings, Media, Dashboard)
+-------------------------------------------------- */
+/* Les max-width/margin sont déjà harmonisés ci-dessus, donc on retire les doublons ici */
+.page-admin-project-form .row,
+.page-admin-page-form .row,
+
+.page-admin-project-form .col-lg-9, .page-admin-project-form .col-lg-3,
+.page-admin-page-form .col-md-8, .page-admin-page-form .col-md-4,
+    padding: 0;
+.page-admin-project-form .col-lg-9, .page-admin-page-form .col-md-8 {
+    flex: 2 1 0;
+    min-width: 0;
+}
+.page-admin-project-form .col-lg-3, .page-admin-page-form .col-md-4 {
+    flex: 0 0 340px;
+    min-width: 300px;
+    max-width: 370px;
+}
+.page-admin-project-form .card,
+.page-admin-page-form .card,
+.page-admin-page-list .card,
+.page-admin-media-library .card,
+.page-admin-project-form .card-header,
+.page-admin-page-form .card-header,
+.page-admin-page-list .card-header{
+    background: #f8fafc;
+    font-weight: 500;
+    font-size: 1.08rem;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 0.7rem 1rem;
+}
+.page-admin-project-form .card-body,
+.page-admin-page-form .card-body,
+.page-admin-page-list .card-body,
+
+.page-admin-project-form .sticky-sidebar-options,
+.page-admin-page-form .sticky-sidebar-options {
+    position: sticky;
+    top: 1.5rem;
+    z-index: 10;
+}
+.page-admin-project-form .form-label,
+.page-admin-page-form .form-label {
+    font-weight: 500;
+    margin-bottom: 0.2rem;
+}
+.page-admin-project-form .form-control,
+.page-admin-project-form .form-select,
+.page-admin-page-form .form-control,
+.page-admin-page-form .form-select,{
+    border-radius: 6px;
+    font-size: 1rem;
+}
+.page-admin-project-form .form-check-label,
+.page-admin-page-form .form-check-label {
+    font-size: 0.98rem;
+}
+.page-admin-project-form .img-thumbnail,
+.page-admin-page-form .img-thumbnail, {
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.page-admin-project-form .alert,
+.page-admin-page-form .alert {
+    border-radius: 7px;
+    font-size: 0.97rem;
+}
+.page-admin-project-form .project-items-list {
+    max-height: 340px;
+    overflow-y: auto;
+    padding-right: 8px;
+}
+.page-admin-project-form .item-card {
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    margin-bottom: 1rem;
+}
+.page-admin-project-form .item-card .card-img-top {
+    border-radius: 8px 8px 0 0;
+    object-fit: cover;
+    height: 120px;
+    background: #f3f4f6;
+}
+.page-admin-project-form .item-card .card-body {
+    padding: 0.7rem 0.7rem 0.5rem 0.7rem;
+}
+.page-admin-project-form .item-card .input-group-text {
+    min-width: 55px;
+}
+.page-admin-project-form .item-card .form-control-sm {
+    font-size: 0.97rem;
+    padding: 0.25rem 0.5rem;
+}
+.page-admin-project-form .item-card .btn-outline-danger {
+    font-size: 0.95rem;
+    padding: 0.1rem 0.5rem;
+}
+.page-admin-project-form .item-card .card-footer {
+    padding: 0.3rem 0.5rem;
+}
+.page-admin-project-form .details-grid,
+.page-admin-page-form .details-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.2rem 2rem;
+    margin-bottom: 1.5rem;
+}
+@media (max-width: 991px) {
+    .page-admin-project-form .row,
+    .page-admin-page-form .row {
+        flex-direction: column;
+        gap: 0;
+    }
+    .page-admin-project-form .col-lg-9,
+    .page-admin-project-form .col-lg-3,
+    .page-admin-page-form .col-md-8,
+    .page-admin-page-form .col-md-4 {
+        max-width: 100%;
+        flex: 1 1 100%;
+    }
+    .page-admin-project-form .sticky-sidebar-options,
+    .page-admin-page-form .sticky-sidebar-options {
+        position: static;
+        top: auto;
+    }
+    .page-admin-project-form .project-items-list {
+        max-height: 220px;
+    }
+    .page-admin-project-form .details-grid,
+    .page-admin-page-form .details-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+}
+
+/* --- UX Optimisé pour la liste des pages admin --- */
+.page-admin-page-list .card,
+.page-admin-project-list .card,
+.page-admin-media-library .card,
+.page-admin-dashboard .card {
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+}
+
+/* --- Dashboard Admin Harmonisé --- */
+.page-admin-dashboard .dashboard-header {
+    border-bottom: 1px solid var(--admin-border-color, #dee2e6);
+    padding-bottom: 0.8rem;
+    margin-bottom: 1.5rem;
+}
+.page-admin-dashboard .dashboard-header h1 {
+    font-size: 1.75rem;
+    font-weight: 500;
+    color: var(--admin-heading-color, #212529);
+    margin: 0;
+}
+.page-admin-dashboard .quick-create-buttons .btn {
+    margin-right: 0.75rem;
+    margin-bottom: 0.5rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    border-radius: 6px;
+}
+.page-admin-dashboard .quick-create-buttons .btn i {
+    margin-right: 0.4rem;
+}
+.page-admin-dashboard .welcome-alert {
+    background-color: #e9ecef;
+    border: none;
+    color: var(--admin-body-color, #343a40);
+    font-size: 1rem;
+    border-radius: 7px;
+    margin-bottom: 1.5rem;
+}
+.page-admin-dashboard .breadcrumb {
+    background-color: transparent;
+    padding: 0;
+    margin-bottom: 1.5rem;
+    margin-left: 5.5rem;
+    margin-right: 5.5rem;
+    font-size: 0.85rem;
+}
+.page-admin-dashboard .action-section-title {
+    font-family: var(--admin-font-sans-serif, sans-serif);
+    font-size: 1.15rem;
+    font-weight: 400;
+    color: #6c757d;
+    margin-top: 2.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid #eee;
+}
+.page-admin-dashboard .quick-stats-section .action-section-title {
+    margin-top: 0;
+}
+.page-admin-dashboard .stat-card {
+    border: none;
+    border-left: 4px solid;
+    box-shadow: var(--admin-card-shadow, 0 1px 3px rgba(0,0,0,.05));
+    border-radius: var(--admin-border-radius, 0.375rem);
+    transition: box-shadow 0.2s ease;
+    background-color: var(--admin-card-bg, #fff);
+    position: relative;
+}
+.page-admin-dashboard .stat-card:hover {
+    box-shadow: var(--admin-card-shadow-hover, 0 4px 12px rgba(0,0,0,.08));
+}
+.page-admin-dashboard .stat-card .card-body {
+    padding: 1rem 1.25rem;
+}
+.page-admin-dashboard .stat-card .stat-value {
+    font-size: 1.8rem;
+    font-weight: 500;
+    line-height: 1.2;
+}
+.page-admin-dashboard .stat-card .stat-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+.page-admin-dashboard .stat-card .stat-icon {
+    font-size: 2.8rem;
+    opacity: 0.1;
+    position: absolute;
+    right: 1.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+}
+.page-admin-dashboard .stat-card .card-footer {
+    background-color: transparent;
+    border-top: 1px solid #f1f3f5;
+    padding: 0.5rem 1.25rem;
+}
+.page-admin-dashboard .stat-card .card-footer a {
+    text-decoration: none;
+}
+.page-admin-dashboard .stat-card .card-footer i {
+    font-size: 0.75em;
+}
+.page-admin-dashboard .list-card {
+    border: 1px solid var(--admin-border-color, #dee2e6);
+    box-shadow: var(--admin-card-shadow, 0 1px 3px rgba(0,0,0,.05));
+    border-radius: var(--admin-border-radius, 0.375rem);
+    background-color: var(--admin-card-bg, #fff);
+}
+.page-admin-dashboard .list-card .card-header {
+    background-color: var(--admin-bg-light, #f8fafc);
+    font-size: 0.9rem;
+    font-weight: 500;
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid var(--admin-border-color, #dee2e6);
+}
+.page-admin-dashboard .list-card .card-header i {
+    opacity: 0.7;
+}
+.page-admin-dashboard .list-card .card-body {
+    padding: 0;
+}
+.page-admin-dashboard .list-card .list-group-item {
+    font-size: 0.9rem;
+    padding: 0.65rem 1rem;
+    border-top: 1px solid #f1f3f5;
+    background: transparent;
+}
+.page-admin-dashboard .list-card .list-group-item:first-child {
+    border-top: none;
+}
+.page-admin-dashboard .list-card .list-group-item a {
+    text-decoration: none;
+    font-weight: 500;
+    color: var(--admin-link-color, #0d6efd);
+}
+.page-admin-dashboard .list-card .list-group-item a:hover {
+    color: var(--admin-link-hover-color, #0a58ca);
+}
+.page-admin-dashboard .list-card .list-group-item .text-muted {
+    font-size: 0.8rem;
+}
+.page-admin-dashboard .list-card .card-footer {
+    background-color: var(--admin-bg-light, #f8fafc);
+    text-align: center;
+    padding: 0.5rem;
+    border-top: 1px solid var(--admin-border-color, #dee2e6);
+}
+.page-admin-dashboard .list-card .card-footer a {
+    font-size: 0.85rem;
+    text-decoration: none;
+}
+.page-admin-dashboard .list-card .list-group {
+    border: none;
+}
+@media (max-width: 991px) {
+    .page-admin-dashboard .container-fluid {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+    .page-admin-dashboard .dashboard-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+}
+
+/* --- Media Library Harmonisé --- */
+.page-admin-media-library .media-card .card-img-top {
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    border-bottom: 1px solid var(--admin-border-color, #dee2e6);
+    background-color: #f8f9fa;
+    border-radius: 8px 8px 0 0;
+    min-height: 120px;
+    max-height: 180px;
+}
+.page-admin-media-library .media-card .card-body {
+    font-size: 0.78rem;
+    overflow-wrap: break-word;
+    padding: 0.5rem 0.75rem;
+}
+.page-admin-media-library .media-card .card-footer {
+    background-color: #f8f9fa;
+    padding: 0.5rem 0.75rem;
+    border-top: 1px solid var(--admin-border-color, #dee2e6);
+    border-radius: 0 0 8px 8px;
+}
+.page-admin-media-library .media-card .btn-delete-item {
+    padding: 0.1rem 0.4rem;
+    font-size: 0.75rem;
+    line-height: 1.2;
+}
+.page-admin-media-library .media-card .project-link {
+    color: #6c757d;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+}
+.page-admin-media-library .media-card .project-link:hover {
+    color: var(--admin-link-color, #0d6efd);
+    text-decoration: underline;
+}
+.page-admin-media-library .media-card .metadata-icons {
+    opacity: 0.7;
+}
+.page-admin-media-library .media-card .text-warning {
+    color: #ffc107 !important;
+}
+.page-admin-media-library .media-card .text-muted {
+    color: #6c757d !important;
+}
+.page-admin-media-library .media-card .fw-bold {
+    font-weight: 600 !important;
+}
+.page-admin-media-library .media-card .small {
+    font-size: 0.82rem !important;
+}
+.page-admin-media-library .media-card .text-truncate {
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.page-admin-media-library .media-card .stretched-link {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    opacity: 0;
+}
+.page-admin-media-library .row {
+    margin-left: 0;
+    margin-right: 0;
+}
+.page-admin-media-library .col {
+    padding-left: 0;
+    padding-right: 0;
+}
+@media (max-width: 991px) {
+    .page-admin-media-library .container-fluid {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+    .page-admin-media-library .card-body {
+        padding: 0.7rem 0.5rem;
+    }
+    .page-admin-media-library .media-card .card-img-top {
+        min-height: 80px;
+        max-height: 120px;
+    }
+}
+;
+        max-height: 120px;
+    }
+}
+;
+        max-height: 120px;
+    }
+}
+;
+        max-height: 120px;
+    }
+}
+;
+        max-height: 120px;
+    }
+}
+/* Harmonisation admin : largeur, colonnes, cards, responsive */
+.page-admin-settings .container-fluid {
+    max-width: 1600px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    box-sizing: border-box;
+}
+.page-admin-settings .row {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 2rem;
+}
+.page-admin-settings .col-lg-6 {
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0;
+}
+.page-admin-settings .card {
+    border-radius: 10px;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    background: #fff;
+}
+.page-admin-settings .card-header {
+    background: #f8fafc;
+    font-weight: 500;
+    font-size: 1.08rem;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 0.7rem 1rem;
+}
+.page-admin-settings .card-body {
+    padding: 1.1rem 1.2rem;
+}
+.page-admin-settings .form-label {
+    font-weight: 500;
+    margin-bottom: 0.2rem;
+}
+.page-admin-settings .form-control,
+.page-admin-settings .form-select {
+    border-radius: 6px;
+    font-size: 1rem;
+}
+.page-admin-settings .img-thumbnail {
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+}
+.page-admin-settings .alert {
+    border-radius: 7px;
+    font-size: 0.97rem;
+}
+.page-admin-settings .btn-lg {
+    font-size: 1.1rem;
+    padding: 0.7rem 2.5rem;
+    border-radius: 8px;
+}
+@media (max-width: 991px) {
+    .page-admin-settings .row {
+        flex-direction: column;
+        gap: 0;
+    }
+    .page-admin-settings .col-lg-6 {
+        max-width: 100%;
+        flex: 1 1 100%;
+    }
+    .page-admin-settings .container-fluid {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
+}
+@media (min-width: 992px) {
+    .page-admin-settings .container-fluid {
+        padding-left: 2rem;
+        padding-right: 2rem;
+    }
+}
+/* Styles spécifiques au Dashboard - Intégrés ici */
+
+/* Layout Général Contenu Dashboard */
+.admin-dashboard-content .breadcrumb { 
+    background-color: transparent; 
+    padding: 0; 
+    margin-bottom: 1.5rem; 
+    margin-left: 5.5rem; 
+    margin-right: 5.5rem; 
+    font-size: 0.85rem;}
+.dashboard-header { border-bottom: 1px solid var(--admin-border-color, #dee2e6); padding-bottom: 0.8rem; margin-bottom: 1.5rem; }
+.dashboard-header h1 { font-size: 1.75rem; font-weight: 500; color: var(--admin-heading-color, #212529); margin: 0; }
+.welcome-alert { background-color: #e9ecef; border: none; color: var(--admin-text-color); font-size: 1rem; }
+
+/* Titres de Section */
+.action-section-title {
+    font-family: var(--admin-font-sans-serif, sans-serif); 
+    font-size: 1.15rem; 
+    font-weight: 400; 
+    color: #6c757d; 
+    margin-top: 2.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid #eee;
+}
+.quick-stats-section .action-section-title { margin-top: 0; } /* Pas de marge haute pour le premier */
+
+/* Boutons Création Rapide */
+.quick-create-buttons .btn { 
+    margin-right: 0.75rem; 
+    margin-bottom: 0.5rem; 
+    padding: 0.5rem 1rem; 
+    font-size: 0.9rem;
+}
+.quick-create-buttons .btn i { margin-right: 0.4rem; }
+
+/* Cartes Statistiques */
+.stat-card { 
+    border: none; 
+    border-left: 4px solid;
+    box-shadow: var(--admin-card-shadow, 0 1px 3px rgba(0,0,0,.05)); 
+    border-radius: var(--admin-border-radius, 0.375rem);
+    transition: box-shadow 0.2s ease; 
+    background-color: var(--admin-card-bg, #fff);
+}
+.stat-card:hover { 
+    box-shadow: var(--admin-card-shadow-hover, 0 4px 12px rgba(0,0,0,.08)); 
+}
+.stat-card .card-body { padding: 1rem 1.25rem; }
+.stat-card .stat-value { font-size: 1.8rem; font-weight: 500; line-height: 1.2; }
+.stat-card .stat-label { font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.5px; color: #6c757d; margin-bottom: 0.5rem; display: block; }
+.stat-card .stat-icon { font-size: 2.8rem; opacity: 0.1; position: absolute; right: 1.25rem; top: 50%; transform: translateY(-50%); }
+.stat-card .card-footer { background-color: transparent; border-top: 1px solid #f1f3f5; padding: 0.5rem 1.25rem; }
+.stat-card .card-footer a { text-decoration: none; }
+.stat-card .card-footer i { font-size: 0.75em; }
+
+/* Cartes Listes (Recent, Needs Attention) */
+.list-card {
+    border: 1px solid var(--admin-border-color, #dee2e6);
+    box-shadow: var(--admin-card-shadow);
+    border-radius: var(--admin-border-radius);
+    background-color: var(--admin-card-bg);
+}
+.list-card .card-header { 
+    background-color: var(--admin-bg-light); 
+    font-size: 0.9rem; font-weight: 500;
+    padding: 0.6rem 1rem;
+    border-bottom: 1px solid var(--admin-border-color);
+ }
+ .list-card .card-header i { opacity: 0.7; }
+.list-card .card-body { padding: 0; } 
+.list-card .list-group-item { 
+    font-size: 0.9rem; padding: 0.65rem 1rem; border-top: 1px solid #f1f3f5; 
+    background: transparent; 
+}
+ .list-card .list-group-item:first-child { border-top: none; }
+.list-card .list-group-item a { text-decoration: none; font-weight: 500; color: var(--admin-link-color); }
+ .list-card .list-group-item a:hover { color: var(--admin-link-hover-color); }
+.list-card .list-group-item .text-muted { font-size: 0.8rem; }
+.list-card .card-footer { background-color: var(--admin-bg-light); text-align: center; padding: 0.5rem; border-top: 1px solid var(--admin-border-color);}
+.list-card .card-footer a { font-size: 0.85rem; text-decoration: none; }
+.list-card .list-group { border: none; } 

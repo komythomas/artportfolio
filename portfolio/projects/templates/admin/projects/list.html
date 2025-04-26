@@ -1,0 +1,148 @@
+{% extends 'admin/base.html' %} {# Assumes your admin base template #}
+
+{% block title %}{{ page_title or "Project Management" }}{% endblock %}
+{% block mobile_title %}Projects{% endblock %}
+{% block body_class %}page-admin-project-list{% endblock %}
+
+{% block head_css %}
+{{ super() }}
+<style>
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">{{ page_title or "Project Management" }}</h1>
+    
+    {# Breadcrumbs #}
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active"> Manage projects</li>
+    </ol>
+
+    {# "Create New" Button #}
+    <div class="mb-3">
+        <a href="{{ url_for('projects.create_project') }}" class="btn btn-success">
+            <i class="fas fa-plus me-1"></i> Create New Project 
+        </a>
+    </div>
+
+    {# Flash Messages #}
+    {% include '_flash_messages.html' %} 
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% endwith %}
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header">
+            <i class="fas fa-palette me-1"></i>
+            Art Projects List
+        </div>
+        <div class="card-body">
+            <div class="table-responsive"> 
+                <table id="projectsTable" class="table table-bordered table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 90px;">Image</th>
+                            <th>Title / Slug</th>
+                            <th>Categories</th> 
+                            <th class="text-center">Status</th>
+                            <th class="text-center">Display In</th>
+                            <th class="text-center">NFT</th>
+                            <th>Created</th>
+                            <th class="text-center" style="width: 110px;">Actions</th> 
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if projects %}
+                            {% for project in projects %}
+                            <tr>
+                                {# Thumbnail #}
+                                <td class="text-center p-1" style="width: 90px;">
+                                    {% if project.display_image_path %}
+                                    <img src="{{ project.display_image_path }}"
+                                         alt="Display image for {{ project.title|escape }}" 
+                                         style="height: 60px; width: 80px; object-fit: cover; border-radius: 3px;">
+                                    {% else %}
+                                        <span class="text-muted small d-inline-block p-2">(No image)</span>
+                                    {% endif %}
+                                </td>
+
+                                {# Title and Slug #}
+                                <td>
+                                    <a href="{{ url_for('projects.edit_project', id=project.id) }}" class="fw-bold">{{ project.title }}</a><br>
+                                    <small class="text-muted">/{{ project.slug }}</small>
+                                </td>
+                                {# Categories (Multiple) #}
+                                <td class="small">
+                                    {% if project.categories %}
+                                        {% for cat in project.categories %}
+                                             <span class="badge bg-light text-dark border me-1 mb-1">{{ cat.name }}</span>
+                                        {% endfor %}
+                                    {% else %}
+                                        <span class="text-muted">--</span>
+                                    {% endif %}
+                                </td>
+                                {# Status Badge #}
+                                <td class="text-center">
+                                    {% if project.status == 'published' %} <span class="badge bg-success">Published</span>
+                                    {% elif project.status == 'draft' %} <span class="badge bg-warning text-dark">Draft</span>
+                                    {% elif project.status == 'archived' %} <span class="badge bg-secondary">Archived</span>
+                                    {% else %} <span class="badge bg-light text-dark">{{ project.status | capitalize }}</span>
+                                    {% endif %}
+                                </td>
+                                 {# Display In Badge #}
+                                <td class="text-center">
+                                     {% if project.display_in == 'gallery' %} <span class="badge bg-info text-dark">Gallery</span>
+                                     {% elif project.display_in == 'commissions' %} <span class="badge bg-primary">Commissions</span>
+                                     {% elif project.display_in == 'both' %} <span class="badge bg-info text-dark">Gallery</span> <span class="badge bg-primary">Commissions</span>
+                                     {% elif project.display_in == 'none' %} <span class="badge bg-light text-dark">None</span>
+                                     {% else %} <span class="badge bg-light text-dark">{{ project.display_in | default('--') | capitalize }}</span>
+                                     {% endif %}
+                                </td>
+                                {# NFT Status #}
+                                <td class="text-center">
+                                    {% if project.is_nft %}
+                                        <span class="badge rounded-pill bg-purple" title="Blockchain: {{ project.blockchain_network or 'N/A' }}&#10;Contract: {{ project.contract_address or 'N/A' }}">
+                                            <i class="fab fa-ethereum fa-fw"></i> NFT
+                                        </span>
+                                        <style>.bg-purple { background-color: #6f42c1; color: white; }</style>
+                                    {% else %} <span class="text-muted small">No</span>
+                                    {% endif %}
+                                </td>
+                                {# Creation Date #}
+                                <td class="small">
+                                    {{ project.created_at.strftime('%Y-%m-%d') if project.created_at else '--' }}<br>
+                                    <span class="text-muted">{{ project.created_at.strftime('%H:%M') if project.created_at else '' }}</span>
+                                </td>
+                                {# Actions #}
+                                <td class="text-center">
+                                    <a href="{{ url_for('projects.edit_project', id=project.id) }}" class="btn btn-sm btn-outline-primary me-1" title="Edit Project">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form action="{{ url_for('projects.delete_project', id=project.id) }}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete the project \'{{ project.title|escape }}\' and all its images?');">
+                                        <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Delete Project">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr>
+                                <td colspan="8" class="text-center text-muted fst-italic py-4">No projects found.</td>
+                            </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{# Optional: DataTables JS initialization #}
+{# <script> $(document).ready(function() { $('#projectsTable').DataTable({"order": [[ 6, "desc" ]]}); }); </script>  #}
+{% endblock %}

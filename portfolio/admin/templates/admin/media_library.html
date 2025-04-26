@@ -1,0 +1,175 @@
+{% extends "admin/base.html" %} {# Assumes your admin base template #}
+{# Importer la macro de pagination (version avec **kwargs) #}
+{% from "_macros.html" import render_pagination %} 
+
+{% block title %}{{ page_title or "Media Library" }}{% endblock %}
+{% block mobile_title %}Media Library{% endblock %} {# Optional #}
+{% block body_class %}page-admin page-admin-media-library{% endblock %} {# Optional #}
+
+{% block head_css %}
+{{ super() }}
+<style>
+    /* Styles spécifiques Media Library */
+    .media-card .card-img-top {
+        aspect-ratio: 4 / 3; /* Maintenir ratio */
+        object-fit: cover;
+        border-bottom: 1px solid var(--admin-border-color, #dee2e6);
+        background-color: #f8f9fa; /* Fond si l'image ne remplit pas */
+    }
+    .media-card .card-body {
+        font-size: 0.78rem; /* Texte encore plus petit */
+        overflow-wrap: break-word; 
+        padding: 0.5rem 0.75rem; /* Padding corps carte */
+    }
+    .media-card .card-footer {
+        background-color: var(--bs-tertiary-bg, #f8f9fa); 
+        padding: 0.5rem 0.75rem;
+        border-top: 1px solid var(--admin-border-color, #dee2e6);
+    }
+    .media-card .btn-delete-item { /* Style bouton suppression */
+        padding: 0.1rem 0.4rem;
+        font-size: 0.75rem;
+        line-height: 1.2; /* Ajuster hauteur ligne */
+    }
+    .media-card .project-link { /* Style lien projet */
+        color: #6c757d;
+        text-decoration: none;
+    }
+    .media-card .project-link:hover {
+        color: var(--admin-link-color);
+    }
+    .media-card .metadata-icons {
+        opacity: 0.7;
+    }
+</style>
+{% endblock %}
+
+
+{% block content %}
+<div class="container-fluid px-4">
+    <div class="d-flex justify-content-between align-items-center mt-4 mb-3"> {# Ajout mb-3 #}
+        <h1>{{ page_title or "Media Library" }}</h1>
+        {% if total_items is defined %}
+            <span class="badge bg-secondary rounded-pill fs-6">{{ total_items }} total item(s)</span>
+        {% endif %}
+    </div>
+
+    {# Breadcrumbs #}
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item active">Media</li>
+    </ol>
+
+    {# Flash Messages #}
+    {% include '_flash_messages.html' %}
+    {% with messages = get_flashed_messages(with_categories=true) %} ... {% endwith %} {# Bloc Flash #}
+
+    {# TODO: Add Filter/Sort Options #}
+    {# <div class="mb-3"> ... Filters ... </div> #}
+
+    <div class="card mb-4 shadow-sm">
+        <div class="card-header">
+            <i class="fas fa-photo-video me-1"></i>
+            Uploaded Images (Associated with Projects)
+        </div>
+        <div class="card-body">
+            {% if items_pagination and items_pagination.items %}
+                {# Grille un peu moins dense, plus d'espace avec g-4 #}
+                <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 g-4"> 
+                    {% for item in items_pagination.items %}
+                    <div class="col">
+                        <div class="card h-100 shadow-sm media-card">
+                            <a href="{{ item.file_path }}" target="_blank" title="View original image"> 
+                                <img src="{{ item.file_path }}" 
+                                     class="card-img-top" 
+                                     alt="{{ item.alt_text or 'Media item' }}"
+                                     loading="lazy">
+                            </a>
+                            <form action="{{ url_for('admin.delete_media_item', item_id=item.id) }}" method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-danger btn-sm stretched-link" onclick="return confirm('Delete this image?');">
+                                    Delete
+                                </button>
+                            </form>
+                            </a> 
+                            
+                            <div class="card-body">
+                                {# Nom Fichier #}
+                                <p class="mb-1 text-truncate fw-bold small" title="{{ item.file_path.split('/')[-1] }}">
+                                    {{ item.file_path.split('/')[-1] }}
+                                </p>
+                                {# Alt Text #}
+                                {% if item.alt_text %}
+                                <p class="mb-1 text-muted text-truncate small" title="Alt: {{ item.alt_text }}">
+                                    <i class="fas fa-closed-captioning fa-fw me-1 metadata-icons"></i> {{ item.alt_text }}
+                                </p>
+                                {% else %}
+                                 <p class="mb-1 text-warning small" title="Missing Alt Text">
+                                    <i class="fas fa-exclamation-triangle fa-fw me-1 metadata-icons"></i> Alt Text Missing
+                                </p>
+                                {% endif %}
+                                
+                                {# --- AFFICHAGE METADONNEES --- #}
+                                <div class="d-flex justify-content-start gap-2 text-muted small mt-1 metadata-icons">
+                                    {% if item.width and item.height %}
+                                    <span title="Dimensions"><i class="fas fa-ruler-combined fa-fw me-1"></i>{{ item.width }}x{{ item.height }}</span>
+                                    {% endif %}
+                                    {% if item.filesize %}
+                                    <span title="Filesize"><i class="fas fa-weight-hanging fa-fw me-1"></i>{{ item.filesize | filesizeformat }}</span> 
+                                    {% endif %}
+                                </div>
+                                 {# --- FIN AFFICHAGE METADONNEES --- #}
+                            </div>
+                            {# Footer avec lien projet et bouton supprimer #}
+                             <div class="card-footer d-flex justify-content-between align-items-center">
+                                {# Lien Projet #}
+                                <div class="text-truncate">
+                                    {% if item.project %}
+                                    <a href="{{ url_for('projects.edit_project', id=item.project.id) }}" class="project-link small" title="Go to Project: {{ item.project.title }}">
+                                         <i class="fas fa-link fa-xs"></i> {{ item.project.title | truncate(20) }}
+                                    </a>
+                                    {% else %}
+                                        <span class="text-muted small"><em>(Unlinked)</em></span>
+                                    {% endif %}
+                                </div>
+                                {# Bouton Supprimer (pointe vers nouvelle route) #}
+                                <form action="{{ url_for('admin.delete_media_item', item_id=item.id, page=items_pagination.page) }}" {# Utilise la nouvelle route #}
+                                      method="POST" class="d-inline" 
+                                      onsubmit="return confirm('Are you sure you want to PERMANENTLY delete this image? This action cannot be undone.');">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() if csrf_token else '' }}">
+                                    <button type="submit" class="btn btn-outline-danger btn-delete-item" title="Delete Image Permanently">
+                                        <i class="fas fa-trash-alt"></i>
+                                    </button>
+                                </form>
+                             </div> 
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                {# Pagination #}
+                <div class="mt-4 d-flex justify-content-center">
+                    {# Utilise la macro avec **kwargs #}
+                    {{ render_pagination(items_pagination, 'admin.media_library') }} 
+                </div>
+
+            {% else %}
+                <p class="text-center text-muted fst-italic mt-3">No images found associated with projects.</p> 
+            {% endif %}
+        </div> {# End card-body #}
+    </div> {# End card #}
+    
+    <p class="text-muted small mt-3">Note: This view currently shows images uploaded as 'Associated Visuals' within projects. Feature images, page cover images, and setting images are not included in this simplified list.</p> 
+
+</div> {# End container #}
+{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+{# Scripts spécifiques si besoin (ex: Initialisation Lightbox si on clique sur les images ici ?) #}
+{# Exemple GLightbox si on voulait l'activer ici aussi :
+<script src="https://cdn.jsdelivr.net/gh/mcstudios/glightbox/dist/js/glightbox.min.js"></script>
+<script type="text/javascript">
+    const lightbox = GLightbox({ selector: '.media-card a[target="_blank"]' }); 
+</script> 
+#}
+{% endblock %}

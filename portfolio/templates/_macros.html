@@ -1,0 +1,47 @@
+{# portfolio/templates/_macros.html (VERSION SANS **kwargs) #}
+
+{% macro render_pagination(pagination, endpoint, extra_args=None) %}
+  {# extra_args est un dictionnaire optionnel contenant les arguments supplémentaires pour url_for #}
+  {% if pagination and pagination.pages > 1 %}
+  <nav aria-label="Page navigation">
+    <ul class="pagination justify-content-center">
+      
+      {# Bouton Précédent #}
+      <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+        {# Construire les args pour url_for #}
+        {% set prev_args = {'page': pagination.prev_num} %}
+        {% if extra_args %}{% do prev_args.update(extra_args) %}{% endif %}
+        <a class="page-link" href="{% if pagination.has_prev %}{{ url_for(endpoint, **prev_args) }}{% else %}#{% endif %}" aria-label="Previous">
+          <span aria-hidden="true">&laquo;</span>
+        </a>
+      </li>
+
+      {# Liens vers les pages #}
+      {% for p in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+        {% if p %}
+          {# Construire les args pour url_for #}
+          {% set page_args = {'page': p} %}
+          {% if extra_args %}{% do page_args.update(extra_args) %}{% endif %}
+          {% if p == pagination.page %}
+            <li class="page-item active" aria-current="page"><span class="page-link">{{ p }}</span></li>
+          {% else %}
+            <li class="page-item"><a class="page-link" href="{{ url_for(endpoint, **page_args) }}">{{ p }}</a></li>
+          {% endif %}
+        {% else %}
+          <li class="page-item disabled"><span class="page-link">...</span></li> 
+        {% endif %}
+      {% endfor %}
+
+      {# Bouton Suivant #}
+      <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+         {# Construire les args pour url_for #}
+        {% set next_args = {'page': pagination.next_num} %}
+        {% if extra_args %}{% do next_args.update(extra_args) %}{% endif %}
+        <a class="page-link" href="{% if pagination.has_next %}{{ url_for(endpoint, **next_args) }}{% else %}#{% endif %}" aria-label="Next">
+          <span aria-hidden="true">&raquo;</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+  {% endif %}
+{% endmacro %}

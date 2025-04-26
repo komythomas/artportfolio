@@ -1,0 +1,65 @@
+{% extends 'base.html' %} {# Ou base_public.html #}
+{% from "_macros.html" import render_pagination %} {# Importer la macro #}
+
+{% block title %}{{ page_title }} - {{ site_settings.get('site_name', 'Portfolio') }}{% endblock %}
+{% block mobile_title %}Tag: {{ tag.name }}{% endblock %} {# Optionnel #}
+
+{% block content %}
+<div class="container mt-4">
+    {# Titre indiquant le tag #}
+    <h1 class="mb-4 text-center">
+        <span class="badge bg-secondary me-2"><i class="fas fa-tag fa-xs"></i></span> 
+        {{ page_title }}
+    </h1>
+
+    {# Affichage des projets de la page actuelle pour ce tag #}
+    {% if projects_pagination and projects_pagination.items %}
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4"> 
+            {# Itérer sur .items #}
+            {% for project in projects_pagination.items %} 
+            <div class="col">
+                <div class="card h-100 shadow-sm project-card tag-card">
+                    <a href="{{ url_for('main.project_detail', slug=project.slug) }}" class="text-decoration-none">
+                         {% if project.feature_image_path %}
+                            <img src="{{ url_for('static', filename=project.feature_image_path) }}" class="card-img-top" alt="{{ project.title|escape }}" style="height: 250px; object-fit: cover;">
+                        {% else %}
+                             <div class="card-img-top bg-light d-flex align-items-center justify-content-center" style="height: 250px;">
+                                 <span class="text-muted small">No image</span>
+                             </div>
+                        {% endif %}
+                    </a>
+                    <div class="card-body">
+                        <h5 class="card-title mb-1">
+                             <a href="{{ url_for('main.project_detail', slug=project.slug) }}" class="text-decoration-none text-dark stretched-link">{{ project.title }}</a>
+                        </h5>
+                        <p class="card-text small text-muted">{{ project.category or '' }}{% if project.year %} - {{ project.year }}{% endif %}</p>
+                         {% if project.is_nft %}
+                             <span class="badge bg-info text-dark small">NFT</span>
+                        {% endif %}
+                    </div>
+                     {# Optionnel: Afficher les autres tags du projet #}
+                    {# <div class="card-footer bg-transparent border-top-0 pt-1 pb-2">
+                        {% for p_tag in project.tags %}
+                             {% if p_tag.id != tag.id %} {# Exclure le tag courant #}
+                             {# <a href="{{ url_for('main.tag_archive', slug=p_tag.slug) }}" class="badge bg-light text-dark text-decoration-none me-1 small">{{ p_tag.name }}</a>
+                             {% endif %}
+                        {% endfor %}
+                    </div> #}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+
+        {# Inclusion de la pagination #}
+        <div class="mt-5 d-flex justify-content-center">
+            {# Passer l'objet pagination, l'endpoint, ET les arguments de l'URL (slug du tag) #}
+            {{ render_pagination(projects_pagination, 'main.tag_archive', extra_args={'slug': tag.slug}) }} 
+            {# Passer slug directement #}
+        </div>
+
+    {% else %}
+        <p class="text-center text-muted fst-italic mt-5">No projects found for the tag "{{ tag.name }}".</p>
+    {% endif %}
+
+</div> {# Fin container #}
+{% endblock %}

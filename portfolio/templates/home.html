@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    {# Utiliser les settings pour le titre et la description si disponibles #}
+    <title>Accueil - {{ site_settings.get('site_name', 'HSS FineArt') }}</title>
+    <meta name="description" content="{{ site_settings.get('meta_description', 'Portfolio de Hermann Sebastian Schultz') }}">
+    <meta name="author" content="Hermann Sebastian Schultz">
+    <link rel="icon" href="{{ url_for('static', filename='uploads/favicon.ico') }}" type="image/x-icon">
+
+    {# Favicon depuis les settings #}
+    {% if site_settings.get('favicon_path') %}
+    <link rel="icon" href="{{ url_for('static', filename=site_settings.get('favicon_path')) }}" type="image/x-icon">
+    {% endif %}
+
+    {# Liens CSS nécessaires pour cette page spécifique #}
+    {# Important : Inclure SEULEMENT le CSS utile ici. style.css peut contenir des règles générales #}
+    {# mais mobile-menu.css et sidebar.css ne s'appliquent probablement pas #}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}"> {# Pour les styles généraux éventuels #}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+        /* Reset margins and paddings for html and body */
+        html, body {
+            margin: 0;
+            font-family: 'Bahnschrift condensed', serif;
+            padding: 0;
+            font-size: 16px;
+            font-weight: 400;
+            font-style: normal;
+            height: 100%; /* Ensure html and body take up the full height of the viewport */
+            overflow-x: hidden; /* Prevent horizontal scrolling */
+        }
+
+        /* Home Page */
+        .home-page {
+            min-height: 100vh; /* Full viewport height */
+            width: 100vw; /* Full viewport width */
+            margin: 0; /* Remove any default margins */
+            padding: 0; /* Remove any default paddings */
+            background-size: cover; /* Ensure the background image covers the container */
+            background-position: center; /* Center the background image */
+            background-attachment: fixed; /* Keeps the background fixed while scrolling */
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            position: relative;
+        }
+
+        .home-nav {
+            position: absolute;
+            top: 33%;
+            left: 100px;
+            transform: translateY(-50%);
+            color: rgb(255, 255, 255); /* Soft Off-White */
+            display: flex;
+            flex-direction: column;
+            gap: 50px;
+            z-index: 2;
+        }
+
+        .home-nav h1 {
+            font-size: 2.1rem;
+            font-weight: 400;
+            font-family: 'Playfair Display', serif;
+            margin: 0;
+            color: rgb(255, 255, 255); /* Soft Off-White */
+            text-transform: uppercase;
+            letter-spacing: 5px;
+        }
+
+        .home-nav ul {
+            list-style: none;
+            padding: 0;
+            font-size: 2.1rem;
+            font-weight: 400;
+            margin: 0;
+            text-transform: lowercase;
+            text-style: italic;
+            letter-spacing: 2px;
+            color: #ffffff; /* Change to your desired text color */
+            text-decoration: underline; /* Underline the text */
+            text-decoration-thickness: 0.5px; /* Makes the underline thin */
+            text-underline-offset: 6px; /* Adds space between the word and the underline */
+            display: flex;
+            flex-wrap: wrap; /* Allows items to wrap to the next line */
+            gap: 9px;
+        }                
+        
+        .home-nav ul li {
+            flex: 1 1 calc(33.33% - 6px); /* 3 items per row with space between */
+            /* Adjust the width as necessary for your layout */
+            box-sizing: border-box; /* Ensures the gap doesn't interfere with the item width */
+        }
+        
+        @media (max-width: 768px) {
+            .home-nav ul li {
+                flex: 1 1 100%; /* Items take up full width on smaller screens */
+            }
+        }
+        
+        .home-nav ul li a {
+            color: #ffffff; /* Soft Off-White */
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 300;
+            transition: color 0.3s; /* Changed to color transition for smoother effect */
+        }
+
+        .home-nav ul li a:hover {
+            color:rgb(216, 203, 203); /* Light Gray for hover */
+        }
+
+        .home-nav .social-icons {
+            display: flex;
+            gap: 10px;
+            align-items: center; /* Aligns items vertically centered within the flex container */
+            justify-content: flex-start; /* Aligns items to the left */
+            margin-top: 10px;
+        }
+        
+        .home-nav .social-icons a {
+            color: #EDE4E0; /* Soft Off-White */
+            font-size: 2rem;
+            transition: color 0.3s; /* Changed to color transition */
+            text-decoration: none; /* Removes underline from links if any */
+        }
+
+        .home-nav .social-icons a:hover {
+            color:rgb(194, 194, 194); /* Light Gray for hover */
+        }
+
+        /* Adjust content padding when sidebar is hidden */
+        .content {
+            padding: 0; /* Remove padding for Home page */
+            width: 100%; /* Ensure content takes full width */
+            margin: 0; /* Remove any default margins */
+        }
+
+        /* Fade-In and Slide Animation */
+        @keyframes fadeInSlide {
+            0% {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .home-page {
+                min-height: 100vh;
+                width: 100vw; /* Full viewport width on mobile */
+                background-size: cover;
+                background-position: center;
+                background-attachment: fixed; /* Ensure background stays fixed on mobile */
+                align-items: center;
+                justify-content: flex-start;
+            }
+
+            .home-nav {
+                position: absolute;
+                top: 33%;
+                left: 50px;
+                transform: translateY(-50%);
+                padding: 0;
+                background: none; /* No semi-transparent background */
+                align-items: flex-start;
+                text-align: left;
+            }
+
+            .home-nav h1 {
+                font-size: 1.5rem;
+            }
+
+            .home-nav ul {
+                gap: 6px;
+            }
+
+            .home-nav ul li a {
+                font-size: 0.9rem;
+            }
+
+            .home-nav .social-icons a {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    
+    {# Div principale avec image de fond dynamique #}
+    <div class="home-page" 
+         {% if site_settings.get('home_bg_path') %}
+             style="background-image: url('{{ url_for('static', filename=site_settings.get('home_bg_path')) }}');"
+         {% else %}
+             style="background-color: #222;" {# Couleur de secours #}
+         {% endif %}>
+        
+        {# Navigation superposée (version autonome) #}
+        <div class="home-nav">
+            <h1>{{ site_settings.get('site_name', 'Hermann Sebastian Schultz') }}</h1>
+            <ul>
+                {# Liens utilisant url_for et slugs dynamiques/routes dédiées #}
+                {# Assurez-vous que ces slugs existent dans vos Pages ou adaptez les routes #}
+                <li><a href="{{ url_for('main.about') }}">About</a></li> {# Suppose une page avec slug 'about' #}
+                <li><a href="{{ url_for('main.gallery') }}">Gallery</a></li> {# Route directe vers la Gallery #}
+                <li><a href="{{ url_for('main.commissions') }}">Commissions</a></li> {# Route directe #}
+                <li><a href="{{ url_for('main.about') }}">Contact</a></li> {# Suppose une page avec slug 'contact' #}
+            </ul>
+            <div class="social-icons">
+                {# Liens réels vers vos profils #}
+                <a href="https://instagram.com/sebastianschultz" target="_blank" aria-label="Instagram">
+                    <i class="fab fa-instagram"></i>
+                </a>
+                <a href="https://fi.linkedin.com/in/hermann-sebastian-schultz-9673801a8" target="_blank" aria-label="LinkedIn">
+                    <i class="fab fa-linkedin"></i>
+                </a>
+                {# Ajoutez d'autres liens ici si nécessaire #}
+            </div>
+        </div> {# Fin .home-nav #}
+
+    </div> {# Fin .home-page #}
+
+    {# Scripts JS - Inclure seulement ce qui est nécessaire pour CETTE page #}
+    {# Aucun JS spécifique n'est requis pour ce layout simple (pas de menu hamburger ici) #}
+    {# Si vous ajoutez des animations complexes plus tard, mettez le JS ici #}
+
+</body>
+</html>

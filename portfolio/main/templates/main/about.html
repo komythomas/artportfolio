@@ -1,0 +1,46 @@
+{% extends "base.html" %} 
+
+{% block title %}{{ page.title }} - {{ site_settings.get('site_name', 'Portfolio') }}{% endblock %}
+{% block meta_description %}{{ page.meta_description | striptags | truncate(160) if page and page.meta_description else page.content | striptags | truncate(160) if page and page.content else site_settings.get('meta_description', 'Discover Hermann Sebastian Schultz...') }}{% endblock %}
+{% block body_class %}page-about{% endblock %}
+{% block mobile_title %}{{ page.title }}{% endblock %}
+
+{% block head_css %}
+{{ super() }}
+{% endblock %}
+
+
+{% block content %}
+{# Utilisation de container normal pour centrer globalement la zone #}
+<div class="container my-4 my-md-5"> 
+    
+    {# Utilisation de row/col pour une mise en page plus contrôlée #}
+    <div class="row g-5 justify-content-center"> 
+        
+        {# Colonne pour le texte principal #}
+        <div class="col-lg-7 col-md-8">  
+
+            {# Titre de la page #}
+            <h1 class="page-title">{{ page.title }}</h1>
+
+            {# Contenu principal (éditable) #}
+            <div class="about-content content-body"> 
+                {{ page.content | safe if page.content else '<p>Contenu à venir...</p>' | safe }} 
+            </div>
+        </div> 
+
+        {# Colonne pour le portrait (apparaîtra à droite sur écrans larges) #}
+        <div class="col-lg-3 col-md-4 order-md-first order-lg-last"> 
+             <div class="artist-portrait-container sticky-top" style="top: 80px;">
+                 {% if site_settings.get('artist_portrait_path') %}
+                 <img src="{{ url_for('static', filename=site_settings.get('artist_portrait_path')) }}" 
+                      alt="Portrait de {{ site_settings.get('site_name', 'l\'artiste') }}" 
+                      class="artist-portrait-thumb"> 
+                 {% endif %}
+                 {# Vous pouvez ajouter une petite bio fixe ou autre info ici #}
+             </div>
+        </div>
+
+    </div> {# Fin row #}
+</div> {# Fin container #}
+{% endblock %}

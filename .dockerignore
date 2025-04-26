@@ -1,0 +1,32 @@
+# Git
+.git/
+.gitignore
+
+# Docker
+.dockerignore
+Dockerfile
+
+# Python / Venv
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*.pyc
+
+# Fichiers locaux / Secrets
+logs/
+instance/
+*.db
+*.sqlite3
+app.log
+.env*
+*.env
+
+# IDE / OS
+.idea/
+.vscode/
+*.DS_Store
+*.iml
+
+# Documentation non nécessaire dans l'image
+README.md

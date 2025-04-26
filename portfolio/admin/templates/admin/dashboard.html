@@ -1,0 +1,154 @@
+{% extends "admin/base.html" %} 
+
+{% block title %}Admin Dashboard{% endblock %}
+{% block mobile_title %}Dashboard{% endblock %} 
+{% block body_class %}page-admin page-admin-dashboard{% endblock %} 
+
+{% block head_css %}
+    {{ super() }} 
+
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4 admin-dashboard-content"> 
+    
+    <div class="dashboard-header d-flex justify-content-between align-items-center mb-3">
+         <h1 class="mt-4 mb-0">Dashboard</h1>
+         <div class="quick-create-buttons">
+            <a href="{{ url_for('projects.create_project') }}" class="btn btn-success">
+                <i class="fas fa-plus me-1"></i> New Project
+            </a>
+            <a href="{{ url_for('pages.create_page') }}" class="btn btn-secondary">
+                <i class="fas fa-plus me-1"></i> New Page
+            </a>
+         </div>
+    </div>
+    
+    {# Welcome & Flash #}
+    <div class="alert welcome-alert alert-dismissible fade show" role="alert">
+        Welcome back, <strong>{{ current_user.username }}</strong>!
+        <button type="button" class="btn-close btn-sm" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% include '_flash_messages.html' %} 
+    {% with messages = get_flashed_messages(with_categories=true) %} ... {% endwith %} 
+
+    {# Rangée de Statistiques Clés #}
+    <section class="quick-stats-section mb-4">
+         <h2 class="action-section-title pt-0">Overview</h2>
+         <div class="row g-4"> {# Espacement g-4 #}
+             {# Projets #}
+             <div class="col-lg-3 col-md-6">
+                 <div class="card stat-card border-primary shadow-sm h-100">
+                     <div class="card-body position-relative">
+                         <div class="stat-value text-primary">{{ stats.get('projects_total', 'N/A') }}</div>
+                         <div class="stat-label text-primary">Total Projects</div>
+                         <i class="fas fa-palette stat-icon"></i>
+                     </div>
+                     <div class="card-footer bg-transparent border-0 pt-0 small text-muted">
+                         {{ stats.get('projects_published', '?') }} Pub. | 
+                         {{ stats.get('projects_draft', '?') }} Draft | 
+                         {{ stats.get('projects_archived', '?') }} Arch.
+                     </div>
+                 </div>
+             </div>
+             {# Pages #}
+             <div class="col-lg-3 col-md-6">
+                 <div class="card stat-card border-success shadow-sm h-100">
+                     <div class="card-body position-relative">
+                         <div class="stat-value text-success">{{ stats.get('pages_total', 'N/A') }}</div>
+                         <div class="stat-label text-success">Dynamic Pages</div>
+                         <i class="fas fa-file-alt stat-icon"></i>
+                     </div>
+                      <div class="card-footer bg-transparent border-0 pt-0 small text-muted">
+                         {{ stats.get('pages_visible', '?') }} Visible | 
+                         {{ stats.get('pages_hidden', '?') }} Hidden
+                     </div>
+                 </div>
+             </div>
+             {# Items / Media + Stats Associées #}
+              <div class="col-lg-3 col-md-6">
+                 <div class="card stat-card border-info shadow-sm h-100">
+                     <div class="card-body position-relative">
+                         <div class="stat-value text-info">{{ stats.get('items_total', 'N/A') }}</div>
+                         <div class="stat-label text-info">Media Items</div>
+                          <i class="fas fa-images stat-icon"></i>
+                     </div>
+                     <div class="card-footer bg-transparent border-0 pt-0 small text-muted d-flex justify-content-between">
+                          <span>
+                              <i class="fas fa-database fa-xs me-1"></i> {{ stats.get('items_storage_bytes') | filesizeformat }}
+                          </span>
+                          <span class="{{ 'text-warning' if stats.get('items_missing_alt', 0) > 0 else '' }}" title="{{ stats.get('items_missing_alt', '?') }} items missing alt text">
+                              <i class="fas fa-low-vision fa-xs me-1"></i> Alt: {{ stats.get('items_missing_alt', '?') }} missing
+                          </span>
+                     </div>
+                      <a href="{{ url_for('admin.media_library') }}" class="stretched-link" aria-label="View Media Library"></a> 
+                 </div>
+             </div>
+              {# Tags & Categories #}
+              <div class="col-lg-3 col-md-6">
+                 <div class="card stat-card border-secondary shadow-sm h-100">
+                     <div class="card-body position-relative">
+                         <div class="stat-value text-secondary">{{ stats.get('tags_total', 'N/A') }} / {{ stats.get('categories_total', 'N/A') }}</div>
+                         <div class="stat-label text-secondary">Tags / Categories</div>
+                         <i class="fas fa-tags stat-icon"></i>
+                     </div>
+                      {# Lien vers une future page de gestion ? #}
+                     {# <div class="card-footer bg-transparent border-0 pt-0"> <a href="#" class="small text-secondary text-decoration-none">(Manage)</a> </div> #}
+                 </div>
+             </div>
+         </div>
+    </section>
+
+    {# Rangée pour Contenu Récent & Contenu à Surveiller #}
+    <div class="row g-4"> 
+        {# Colonne pour Contenu Récent #}
+        <div class="col-lg-6 mb-4">
+            <h2 class="action-section-title">Recent Updates</h2>
+            <div class="card list-card shadow-sm mb-4 h-100"> 
+                <div class="card-header"><i class="fas fa-palette me-1 opacity-75"></i>Updated Projects</div>
+                <div class="card-body">
+                     {% if recent_projects %}<ul class="list-group list-group-flush">{% for project in recent_projects %}<li class="list-group-item d-flex justify-content-between align-items-center"><a href="{{ url_for('projects.edit_project', id=project.id) }}" title="Edit '{{ project.title }}'">{{ project.title | truncate(45) }}</a><span class="text-muted">{{ project.updated_at.strftime('%Y-%m-%d') if project.updated_at else '' }}</span></li>{% endfor %}</ul>
+                     {% else %}<p class="text-center text-muted p-3 mb-0 small">No recent project updates.</p>{% endif %}
+                </div>
+                {% if stats.get('projects_total', 0) > 5 %}<div class="card-footer"><a href="{{ url_for('projects.list_projects') }}">View All Projects...</a></div>{% endif %}
+            </div>
+             <div class="card list-card shadow-sm h-100">
+                <div class="card-header"><i class="fas fa-file-alt me-1 opacity-75"></i>Updated Pages</div>
+                <div class="card-body">
+                     {% if recent_pages %}<ul class="list-group list-group-flush">{% for page in recent_pages %}<li class="list-group-item d-flex justify-content-between align-items-center"><a href="{{ url_for('pages.edit_page', id=page.id) }}" title="Edit '{{ page.title }}'">{{ page.title | truncate(45) }}</a><span class="text-muted">{{ page.updated_at.strftime('%Y-%m-%d') if page.updated_at else '' }}</span></li>{% endfor %}</ul>
+                     {% else %}<p class="text-center text-muted p-3 mb-0 small">No recent page updates.</p>{% endif %}
+                </div>
+                 {% if stats.get('pages_total', 0) > 5 %}<div class="card-footer"><a href="{{ url_for('pages.list_pages') }}">View All Pages...</a></div>{% endif %}
+            </div>
+        </div>
+
+        {# Colonne pour "Needs Attention" & Settings Link #}
+         <div class="col-lg-6 mb-4">
+             <h2 class="action-section-title">Needs Attention</h2>
+             <div class="card list-card shadow-sm mb-4 h-100"> 
+                <div class="card-header"><i class="fas fa-pencil-ruler me-1 opacity-75"></i>Draft Projects</div>
+                <div class="card-body">
+                     {% if draft_projects %}<ul class="list-group list-group-flush">{% for project in draft_projects %}<li class="list-group-item d-flex justify-content-between align-items-center"><a href="{{ url_for('projects.edit_project', id=project.id) }}" title="Edit Draft '{{ project.title }}'">{{ project.title | truncate(30) }}</a><span class="badge bg-warning text-dark rounded-pill">Draft</span></li>{% endfor %}</ul>
+                     {% else %}<p class="text-center text-muted p-3 mb-0 small">No draft projects found.</p>{% endif %}
+                </div>
+                 {% if stats.get('projects_draft', 0) > 5 %}<div class="card-footer"><a href="#">View All Drafts...</a></div>{% endif %} 
+            </div>
+             <div class="card list-card shadow-sm h-100"> 
+                <div class="card-header"><i class="fas fa-eye-slash me-1 opacity-75"></i>Hidden Pages</div>
+                <div class="card-body">
+                     {% if hidden_pages %}<ul class="list-group list-group-flush">{% for page in hidden_pages %}<li class="list-group-item d-flex justify-content-between align-items-center"><a href="{{ url_for('pages.edit_page', id=page.id) }}" title="Edit Hidden Page '{{ page.title }}'">{{ page.title | truncate(30) }}</a><span class="badge bg-secondary rounded-pill">Hidden</span></li>{% endfor %}</ul>
+                     {% else %}<p class="text-center text-muted p-3 mb-0 small">No hidden pages found.</p>{% endif %}
+                </div>
+                 {% if stats.get('pages_hidden', 0) > 5 %}<div class="card-footer"><a href="#">View All Hidden...</a></div>{% endif %} 
+            </div>
+            {# Le lien Settings est déjà dans la navbar principale #}
+        </div>
+    </div>
+
+</div> 
+{% endblock %}
+
+{% block scripts %}
+{{ super() }} 
+{# Pas de JS spécifique nécessaire pour ce dashboard #}
+{% endblock %}

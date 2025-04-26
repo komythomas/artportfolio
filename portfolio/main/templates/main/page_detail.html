@@ -1,0 +1,50 @@
+{# portfolio/main/templates/main/page_detail.html #}
+{% extends 'base.html' %} {# Utilise VOTRE base.html fourni #}
+
+{# Définir le titre de l'onglet navigateur #}
+{% block title %}{{ page.title }} - {{ site_settings.get('site_name', 'Portfolio') }}{% endblock %}
+
+{# Définir le titre pour le header mobile (optionnel) #}
+{% block mobile_title %}{{ page.title }}{% endblock %}
+
+{# Définir la meta description (optionnel, pourrait prendre un extrait) #}
+{% block meta_description %}{{ page.meta_description | striptags | truncate(160) if page and page.meta_description else site_settings.get('meta_description', 'Sebastian Hermann Schultz FineArt') }}{% endblock %}
+
+{# Contenu principal de la page #}
+{% block content %}
+<div class="container page-container page-{{ page.slug }}"> {# Classe CSS spécifique au slug #}
+    
+    {# Afficher l'image de couverture si elle existe #}
+    {% if page.cover_image_path %}
+    <div class="page-cover-image mb-4 text-center">
+        <img src="{{ url_for('static', filename=page.cover_image_path) }}" 
+             alt="Image de couverture pour {{ page.title|escape }}" 
+             class="img-fluid rounded shadow-sm" 
+             style="max-height: 400px;"> {# Ajustez le style si besoin #}
+    </div>
+    {% endif %}
+
+    <div class="row justify-content-center">
+        <div class="col-lg-9 col-md-10"> {# Ajuster la largeur #}
+            
+            <article class="page-content">
+                {# Le titre est peut-être déjà dans le header mobile, mais on peut le répéter ici #}
+                <h1 class="page-title mb-4 {% if page.cover_image_path %}mt-4{% else %}mt-5{% endif %}">{{ page.title }}</h1> 
+                
+                <div class="content-body">
+                    {# Affichage du contenu principal - Utilisez | safe si vous faites confiance au HTML entré par l'admin #}
+                    {{ page.content | safe }}
+                </div>
+
+            </article> {# Fin page-content #}
+            
+        </div> {# Fin col #}
+    </div> {# Fin row #}
+
+</div> {# Fin container #}
+{% endblock %}
+
+{# Pas de scripts spécifiques pour l'instant, mais le bloc est là #}
+{% block scripts %}
+{{ super() }} {# Inclut les scripts de base.html (mobile-menu.js, tinymce - même si non utilisé ici) #}
+{% endblock %}

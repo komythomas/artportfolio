@@ -1,0 +1,88 @@
+{# portfolio/main/templates/main/commissions.html #}
+{% extends "base.html" %} {# Hérite de la base publique #}
+{% from "_macros.html" import render_pagination %} {# Importer pagination #}
+
+{% block title %}{{ page_title or "Commissions" }} - {{ site_settings.get('site_name', 'Portfolio') }}{% endblock %}
+{% block mobile_title %}{{ page_title or "Commissions" }}{% endblock %}
+
+{# Utiliser la même classe body que gallery pour partager les styles de grille #}
+{% block body_class %}page-work-grid{% endblock %}
+
+{% block head_css %}
+    {{ super() }}
+    {# Les styles pour .page-work-grid et .project-card-minimal-masonry 
+       sont dans style.css, pas besoin de CSS spécifique ici. #}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-lg-4 px-md-3 px-2 my-4 my-md-5"> {# Full width avec padding #}
+
+    <h1 class="page-title mb-4">{{ page_title or "Commissions" }}</h1>
+
+    {# Flash messages si besoin #}
+    {% include '_flash_messages.html' %} 
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    {# Afficher le contenu dynamique de la page 'commissions' si passé par la route #}
+    {% if page_content %}
+        <div class="page-content-intro content-body mb-4">
+            {{ page_content | safe }}
+        </div>
+        <hr class="mb-4"> {# Séparateur optionnel #}
+    {% endif %}
+    
+    {# La grille des projets (exactement la même structure que gallery.html) #}
+    {% if projects_pagination and projects_pagination.items %}
+        {# --- CONTENEUR POUR BOOTSTRAP MASONRY --- #}
+        <div class="row row-cols-1 row-cols-md-2 g-4 project-grid-minimal" data-masonry='{"percentPosition": true }'>
+            {% for project in projects_pagination.items %}
+                {# Structure de la carte (identique à gallery.html) #}
+                <div class="col-md-6"> {# Utiliser col-md-6 pour 2 colonnes sur medium+ #}
+                    <div class="project-card-minimal-masonry"> 
+                        <a href="{{ url_for('main.project_detail', slug=project.slug) }}" 
+                           class="project-card-image-link" 
+                           title="View project: {{ project.title|escape }}">
+                            {% if project.display_image_path %}
+                                <img src="{{ project.display_image_path }}" 
+                                     alt="{{ project.title|escape }}" 
+                                     loading="lazy">
+                            {% else %}
+                                <div class="no-image-placeholder"><span>{{ project.title }}</span></div>
+                            {% endif %}
+                        </a>
+                        <div class="project-card-text">
+                            <h3 class="project-card-title">
+                                <a href="{{ url_for('main.project_detail', slug=project.slug) }}">{{ project.title }}</a>
+                            </h3>
+                            {% if project.year %}
+                            <p class="project-card-meta">{{ project.year }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+        {# --- FIN CONTENEUR MASONRY --- #}
+
+        {# Pagination #}
+        <div class="mt-5 d-flex justify-content-center">
+            {# Utiliser le bon endpoint pour la pagination de cette page #}
+            {{ render_pagination(projects_pagination, 'main.commissions') }} 
+        </div>
+
+    {% else %}
+         {# Message adapté #}
+        <p class="text-center text-muted fst-italic mt-5">No commission projects found.</p>
+    {% endif %}
+
+</div>
+{% endblock %}

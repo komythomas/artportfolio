@@ -1,0 +1,69 @@
+
+{# portfolio/templates/_form_macros.html (Version compatible Vercel Blob et static) #}
+
+{% macro render_field_with_errors(field, label_visible=true, class_='', id=None, placeholder='', type=None, rows=None, description=None) %}
+<div class="mb-3">
+  {% if label_visible and field.label %}
+      {{ field.label(class="form-label" + (" required" if field.flags.required else "")) }}
+  {% endif %}
+
+  {# Rendre le champ en passant les arguments explicitement #}
+  {% set field_id = id if id else field.id %}
+  {% set field_class = class_ if class_ else 'form-control' %}
+  {% set field_placeholder = placeholder if placeholder else field.render_kw.get('placeholder', '') if field.render_kw else '' %}
+  {% set field_type = type if type else field.render_kw.get('type', 'text') if field.render_kw else 'text' %}
+
+  {% if field.type == 'TextAreaField' and rows %}
+       {{ field(class_=field_class, id=field_id, placeholder=field_placeholder, rows=rows) }}
+  {% elif field.type == 'BooleanField' or field.type == 'RadioField' %}
+       <div class="form-check">
+           {{ field(class_="form-check-input " + field_class, id=field_id) }}
+           {% if field.label %}{{ field.label(class="form-check-label", for=field_id) }}{% endif %}
+       </div>
+  {% else %}
+      {{ field(class_=field_class, id=field_id, placeholder=field_placeholder, type=field_type) }}
+  {% endif %}
+
+  {# Affichage des erreurs #}
+  {% if field.errors %}
+    <div class="invalid-feedback d-block">
+        {% for error in field.errors %}
+          <span>{{ error }}</span><br>
+        {% endfor %}
+    </div>
+  {% endif %}
+
+  {# Affichage de la description/aide #}
+  {% set field_description = description if description else field.description %}
+  {% if field_description %}
+      <small class="form-text text-muted">{{ field_description }}</small>
+  {% endif %}
+</div>
+{% endmacro %}
+
+{# Macro render_file_field compatible Vercel Blob/static #}
+{% macro render_file_field(field, current_image_url=None, current_image_label="Current Image") %}
+<div class="mb-3">
+    {% if field.label %}
+        {{ field.label(class="form-label" + (" required" if field.flags.required else "")) }}
+    {% endif %}
+
+    {% if current_image_url %}
+    <div class="mb-2 form-image-preview">
+        <img src="{{ current_image_url }}" alt="{{ current_image_label }}" class="img-thumbnail" style="max-width:180px; max-height:180px;">
+        <small class="form-text text-muted d-block">{{ current_image_label }}</small>
+    </div>
+    {% endif %}
+
+    {{ field(class_="form-control") }}
+
+    {% if field.errors %}
+      <div class="invalid-feedback d-block">
+          {% for error in field.errors %}
+            <span>{{ error }}</span><br>
+          {% endfor %}
+      </div>
+    {% endif %}
+    <small class="form-text text-muted"> If left blank, the first 'Associated Visual' (ordered by 'Order') will be used. This will ensure a default image is displayed for the project.</small>
+</div>
+{% endmacro %}

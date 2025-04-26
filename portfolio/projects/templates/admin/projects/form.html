@@ -1,0 +1,241 @@
+
+{% extends "admin/base.html" %}
+{% from "_form_macros.html" import render_field_with_errors, render_file_field %}
+
+{% block title %}{{ page_title }}{% endblock %}
+{% block mobile_title %}{{ page_title }}{% endblock %}
+{% block body_class %}page-admin-project-form{% endblock %}
+
+{% block head_css %}
+{{ super() }}
+
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">{{ page_title }}</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('projects.list_projects') }}">Projects</a></li>
+        <li class="breadcrumb-item active">{{ 'New Project' if not project else 'Edit Project' }}</li>
+    </ol>
+    {% include '_flash_messages.html' %}
+
+    <form method="POST" enctype="multipart/form-data" novalidate>
+        {{ form.hidden_tag() }}
+
+        <div class="row">
+            <!-- Colonne principale -->
+            <div class="col-lg-9 order-lg-1">
+
+                <!-- Card 1 : Détails -->
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-header">
+                        <i class="fas fa-pen-nib me-1"></i>Project Details
+                    </div>
+                    <div class="card-body">
+                        {{ render_field_with_errors(form.title, class_="form-control form-control-lg", placeholder="Project Title") }}
+                        {{ render_field_with_errors(form.slug, class_="form-control", placeholder="leave blank to auto-generate", description="Unique URL identifier.") }}
+                        <div class="details-grid">
+                            {{ render_field_with_errors(form.categories, label_visible=true, class_="form-control form-control-sm", placeholder="Select or type categories...", id="projectCategoriesInput") }}
+                            {{ render_field_with_errors(form.year, label_visible=true, class_="form-control form-control-sm", placeholder="e.g., 2024") }}
+                            {{ render_field_with_errors(form.techniques, label_visible=true, class_="form-control form-control-sm", placeholder="e.g., Oil on canvas") }}
+                            {{ render_field_with_errors(form.collection, label_visible=true, class_="form-control form-control-sm", placeholder="e.g., Abstract Series") }}
+                        </div>
+                        
+                        <div>
+                            <label for="projectDescriptionEditor" class="form-label">{{ form.description.label.text }}</label>
+                            {{ render_field_with_errors(form.description, label_visible=false, class_="form-control", rows="15", id="projectDescriptionEditor") }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 2 : NFT -->
+                <div class="card mb-4 shadow-sm" id="nft-details-card" {% if not form.is_nft.data %}style="display: none;"{% endif %}>
+                    <div class="card-header"><i class="fab fa-ethereum me-1"></i>NFT Details <span class="text-muted small">(if applicable)</span></div>
+                    <div class="card-body">
+                        <p class="text-muted small">Fill this information if this project is or have an NFT Version. Required if 'Is NFT?' is checked.</p>
+                        <div class="row g-3">
+                            <div class="col-md-6">{{ render_field_with_errors(form.blockchain_network, class_="form-control", placeholder="e.g., Ethereum, Polygon") }}</div>
+                            <div class="col-md-6">{{ render_field_with_errors(form.token_id, class_="form-control", placeholder="e.g., 1-100 or specific ID") }}</div>
+                            <div class="col-12">{{ render_field_with_errors(form.contract_address, class_="form-control", placeholder="e.g., 0x...") }}</div>
+                            <div class="col-12">{{ render_field_with_errors(form.creator_wallet, class_="form-control", placeholder="e.g., 0x...") }}</div>
+                            <div class="col-12">{{ render_field_with_errors(form.marketplace_url, class_="form-control", type="url", placeholder="https://opensea.io/...") }}</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3 : Visuels associés (items/images) -->
+                <div class="card mb-4 shadow-sm border-primary">
+                    <div class="card-header bg-primary text-white">
+                        <i class="fas fa-images me-1"></i>
+                        Associated Visuals / Images / Details
+                    </div>
+                    <div class="card-body">
+                        <p class="alert alert-light small">
+                            <i class="fas fa-info-circle me-1"></i>
+                            This section manages the <strong>multiple images</strong> associated with the project. Upload images using the <strong>'Add Image(s)'</strong> button below.<br>
+                            <strong>Organisation :</strong> You can reorder images or add alt text using the fields on each image card, then <b>Save Order/Alt Text</b>.<br>
+                            <strong>Astuce :</strong> If no <em>Specific Feature Image</em> is set (see right), the first item here becomes the project's main image. <br>
+                            <strong>Note :</strong> The first image is used as the default thumbnail in the project list. <br>
+                        </p>
+                        <div id="uploadedItemsPreview" class="mb-3 project-items-list">
+                            {% include 'admin/projects/_items_list.html' %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-3 order-lg-2">
+                <!-- Actions -->
+                <div class="card mb-3 shadow-sm sticky-sidebar-options">
+                    <div class="card-header"><i class="fas fa-save me-1"></i>Actions</div>
+                    <div class="card-body text-center">
+                        {{ form.submit(class="btn btn-primary w-100 mb-2", value="Save Project") }}
+                        <a href="{{ url_for('projects.list_projects') }}" class="btn btn-secondary w-100">Cancel</a>
+                    </div>
+                </div>
+
+                <!-- Publishing & Display -->
+                <div class="card mb-3 shadow-sm">
+                    <div class="card-header"><i class="fas fa-cogs me-1"></i>Publishing & Display</div>
+                    <div class="card-body">
+                        {{ render_field_with_errors(form.status, class_="form-select form-select-sm") }}
+                        {{ render_field_with_errors(form.availability, class_="form-select form-select-sm") }}
+                        {{ render_field_with_errors(form.display_in, class_="form-select form-select-sm") }}
+                        <div class="form-check form-switch mt-3">
+                            {{ form.is_nft(class_="form-check-input", id="isNftCheckbox") }}
+                            {{ form.is_nft.label(class_="form-check-label", for="isNftCheckbox") }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature Image -->
+                <div class="card mb-3 shadow-sm">
+                    <div class="card-body">
+                        {% set current_display_image_url = None %}
+                        {% if project and project.display_image_path %}
+                            {% if project.display_image_path.startswith('http') %}
+                                {% set current_display_image_url = project.display_image_path %}
+                            {% else %}
+                                {% set current_display_image_url = url_for('static', filename=project.display_image_path) %}
+                            {% endif %}
+                        {% endif %}
+                        {% if current_display_image_url %}
+                            <div class="mb-2">
+                                <img src="{{ current_display_image_url }}" alt="Current feature image" class="img-thumbnail" style="max-width: 180px; max-height: 180px;">
+                            </div>
+                        {% endif %}
+                        {{ render_file_field(form.feature_image, current_display_image_url, 'Current display image') }}
+                        <small class="text-muted">Formats: jpg, png, webp. Max size: {{ config.MAX_CONTENT_LENGTH // 1048576 }} MB.</small>
+                        {% if current_display_image_url %}
+                            <div class="form-text text-muted">Upload a specific main image. If empty the first 'Associated Visual' (ordered by 'Order') will be used.</div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Tags -->
+                 <div class="card mb-3 shadow-sm">
+                    <div class="card-header"><i class="fas fa-tags me-1"></i>Tags</div>
+                    <div class="card-body">
+                        {{ render_field_with_errors(form.tags, class_="form-control form-control-sm", placeholder="tag1, tag2, ...", id="projectTagsInput") }}
+                    </div>
+                 </div>
+            </div>
+        </div>
+    </form>
+</div>
+{% endblock %}
+{% block scripts %}
+    {{ super() }}
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        // TinyMCE (description)
+        if (typeof tinymce !== 'undefined') {
+            tinymce.init({ selector: '#projectDescriptionEditor', height: 400 });
+        }
+        // NFT toggling
+        const nftCheckbox = document.getElementById('isNftCheckbox');
+        const nftDetailsCard = document.getElementById('nft-details-card');
+        function toggleNftFields() {
+            if(!nftDetailsCard || !nftCheckbox) return;
+            nftDetailsCard.style.display = nftCheckbox.checked ? 'block' : 'none';
+        }
+        if(nftCheckbox) nftCheckbox.addEventListener('change', toggleNftFields);
+
+        // Tagify
+        var tagInput = document.querySelector('#projectTagsInput');
+        if (tagInput && typeof Tagify !== 'undefined') {
+            var tagWhitelist = [];
+            try { tagWhitelist = {{ all_tags_json | tojson | safe if all_tags_json else '[]' }}; } catch(e) {}
+            var tagifyTags = new Tagify(tagInput, {});
+        }
+        var categoryInput = document.querySelector('#projectCategoriesInput');
+        if (categoryInput && typeof Tagify !== 'undefined') {
+            var categoryWhitelist = [];
+            try { categoryWhitelist = {{ all_categories_json | tojson | safe if all_categories_json else '[]' }}; } catch(e) {}
+            var tagifyCategories = new Tagify(categoryInput, { whitelist: categoryWhitelist, enforceWhitelist: true });
+        }
+
+        // Items upload AJAX (détecte addItemsForm via _items_list.html)
+        const addItemsForm = document.getElementById('addItemsForm');
+        if (addItemsForm) {
+            const addItemsInput = document.getElementById('addItemsInput');
+            const addItemsBtn = document.getElementById('addItemsBtn');
+            const addItemsError = document.getElementById('addItemsError');
+            const addItemsSuccess = document.getElementById('addItemsSuccess');
+            const uploadedItemsPreview = document.getElementById('uploadedItemsPreview');
+            addItemsForm.addEventListener('submit', function(event) {
+                event.preventDefault();
+                addItemsError.textContent = "";
+                addItemsSuccess.textContent = "";
+                if(!addItemsInput.files.length) {
+                    addItemsError.textContent = "Please select image file(s) to upload.";
+                    return;
+                }
+                var formData = new FormData(addItemsForm);
+                addItemsBtn.disabled = true;
+                if (addItemsBtn.querySelector('.spinner-icon')) addItemsBtn.querySelector('.spinner-icon').style.display = 'inline-block';
+                if (addItemsBtn.querySelector('.add-icon')) addItemsBtn.querySelector('.add-icon').style.display = 'none';
+
+                fetch(addItemsForm.action, {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                }).then(async response => {
+                    addItemsBtn.disabled = false;
+                    if (addItemsBtn.querySelector('.spinner-icon')) addItemsBtn.querySelector('.spinner-icon').style.display = 'none';
+                    if (addItemsBtn.querySelector('.add-icon')) addItemsBtn.querySelector('.add-icon').style.display = 'inline-block';
+                    if (response.ok) {
+                        const data = await response.json();
+                        if(data.success) {
+                            addItemsSuccess.textContent = (data.message || "Images added!");
+                            // Option: Refresh image list if provided, else reload
+                            if(data.new_items_html && uploadedItemsPreview) {
+                                uploadedItemsPreview.innerHTML = data.new_items_html;
+                            } else if(data.new_items_html && document.getElementById("newItemsContainer")) {
+                                document.getElementById("newItemsContainer").innerHTML = data.new_items_html;
+                            } else {
+                                window.location.reload();
+                            }
+                        }
+                        else {
+                            addItemsError.textContent = data.message || "Error adding images.";
+                        }
+                    } else {
+                        addItemsError.textContent = "Server error ("+response.status+").";
+                    }
+                }).catch(err=>{
+                    addItemsBtn.disabled = false;
+                    if (addItemsBtn.querySelector('.spinner-icon')) addItemsBtn.querySelector('.spinner-icon').style.display = 'none';
+                    if (addItemsBtn.querySelector('.add-icon')) addItemsBtn.querySelector('.add-icon').style.display = 'inline-block';
+                    addItemsError.textContent = "Error: " + (err.message || "Connection failed.");
+                });
+            });
+        }
+      });
+    </script>
+{% endblock %}

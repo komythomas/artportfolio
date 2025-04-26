@@ -1,0 +1,33 @@
+{% extends "base.html" %} 
+
+{% block title %}{{ page.title }} - {{ site_settings.get('site_name', 'Portfolio') }}{% endblock %}
+{% block meta_description %}{{ page.meta_description | striptags | truncate(160) if page and page.meta_description else site_settings.get('meta_description', 'Contact Hermann Sebastian Schultz FineArt') }}{% endblock %}
+{% block mobile_title %}{{ page.title }}{% endblock %}
+{% block body_class %}page-contact{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-9 col-md-10">
+
+            <h1 class="page-title mb-4">{{ page.title }}</h1>
+
+             {% if page.cover_image_path %}
+             <div class="page-cover-image mb-4 text-center">
+                 <img src="{{ url_for('static', filename=page.cover_image_path) }}" alt="Image pour {{ page.title|escape }}" class="img-fluid rounded shadow-sm" style="max-height: 400px;">
+             </div>
+             {% endif %}
+
+            {# Contenu éditable depuis l'admin (ex: texte d'intro, politique de réponse...) #}
+            <div class="contact-content content-body mb-5"> 
+                {{ page.content | safe }} 
+            </div>
+            
+            {# --- Section Statique Spécifique au Contact --- #}
+             {# Vous pourriez aussi ajouter un formulaire de contact HTML ici #}
+             {# <hr class="my-5"> ... formulaire ... #}
+
+        </div> 
+    </div> {# Fin row #}
+</div> {# Fin container #}
+{% endblock %}
