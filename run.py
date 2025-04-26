@@ -15,12 +15,10 @@ app = create_app()
 migrate = Migrate(app, db)
 config = app.config
 
-# Configuration avancée du logging (surtout pour la production)
+# Configuration logging (production)
 if not app.debug and not app.testing:
-    # Créer le dossier logs s'il n'existe pas
     if not os.path.exists('logs'):
         os.mkdir('logs')
-    # Handler pour écrire les logs dans un fichier rotatif
     file_handler = RotatingFileHandler('logs/app.log', maxBytes=10240, backupCount=10)
     file_handler.setLevel(logging.INFO) 
     log_formatter = logging.Formatter(
@@ -90,10 +88,9 @@ def seed_initial_categories():
 if __name__ == '__main__':
     print(f"Debug mode from app.debug: {app.debug}")
 
-    # Créer l'admin user ET les catégories initiales DANS le contexte app
     with app.app_context():
         create_admin_user() 
-        seed_initial_categories() # <-- AJOUTER CET APPEL
+        seed_initial_categories() 
 
     # Lancer le serveur de développement Flask
-    app.run(debug=app.debug, host='0.0.0.0', port=5000) # Utiliser app.debug ici aussi
+    app.run(debug=app.debug, host='0.0.0.0', port=5000)

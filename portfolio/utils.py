@@ -33,23 +33,21 @@ def allowed_file(filename):
 def get_upload_folder():
     """Récupère le chemin absolu d'un dossier d'upload local défini dans la config (fallback si nécessaire)."""
     # Note: Utiliser avec prudence car Vercel n'a pas de FS persistant simple.
-    folder = current_app.config.get('UPLOAD_FOLDER') # Récupère UPLOAD_FOLDER depuis config.py
+    folder = current_app.config.get('UPLOAD_FOLDER') 
     if not folder:
         logger.error("Local UPLOAD_FOLDER not set in Flask config! Falling back to instance path.")
-        folder = os.path.join(current_app.instance_path, 'local_uploads') # Chemin fallback différent
+        folder = os.path.join(current_app.instance_path, 'local_uploads') 
         if not os.path.exists(folder):
             try: 
                 os.makedirs(folder) 
                 logger.info(f"Created fallback local upload folder: {folder}")
             except OSError as e: 
                 logger.error(f"Failed to create fallback local upload folder {folder}: {e}")
-                # En cas d'échec ici, la sauvegarde locale échouera probablement aussi
     return folder
 
 
 def get_relative_path(filename):
     """Retourne un chemin relatif LOCAL hypothétique 'uploads/filename'."""
-    # Attention: Ce n'est PAS le chemin Vercel Blob.
     return f'uploads/{filename}' 
 
 
@@ -60,9 +58,8 @@ def get_absolute_path(relative_path):
         logger.warning(f"Cannot get absolute path for invalid relative path: {relative_path}")
         return None
     filename = os.path.basename(relative_path) 
-    return os.path.join(get_upload_folder(), filename) # Utilise le dossier local
+    return os.path.join(get_upload_folder(), filename) 
 
-# --- Fonction save_file ---
 
 # --- Fonction save_file corrigée ---
 def save_file(file, prefix="file"):
@@ -122,7 +119,6 @@ def save_file(file, prefix="file"):
                 else:
                     img_width, img_height = img_width_before, img_height_before
                 
-                # --- LOGIQUE FORMAT/KWARGS RÉINTÉGRÉE ---
                 save_kwargs = {}
                 original_extension = filename.rsplit('.', 1)[-1].lower()
                 img_format = 'JPEG' 
@@ -137,13 +133,12 @@ def save_file(file, prefix="file"):
                     save_kwargs['quality'] = current_app.config.get('IMAGE_QUALITY', 85)
                     save_kwargs['optimize'] = True
                     save_kwargs['progressive'] = True
-                # --- FIN LOGIQUE FORMAT/KWARGS ---
 
                 # Sauvegarde en mémoire buffer
                 buffer = io.BytesIO()
-                img.save(buffer, format=img_format, **save_kwargs) # Utilise img_format et save_kwargs définis
+                img.save(buffer, format=img_format, **save_kwargs) 
                 buffer.seek(0)
-                processed_data = buffer.getvalue()  # Fix: get the bytes to upload
+                processed_data = buffer.getvalue()  
                 logger.info(f"Image processed in memory: {filename} (Format: {img_format})")
 
             except Exception as pillow_e:
@@ -194,6 +189,6 @@ def delete_file(blob_url):
         logger.info(f"Blob delete command sent successfully for: {blob_url}")
         return True
     except Exception as e: 
-         if 'blob_not_found' in str(e).lower() or '404' in str(e): return True # Considérer comme succès
+         if 'blob_not_found' in str(e).lower() or '404' in str(e): return True 
          else: logger.error(f"Vercel Blob deletion error for URL '{blob_url}': {e}", exc_info=True); return False
 

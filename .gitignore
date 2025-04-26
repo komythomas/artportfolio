@@ -49,3 +49,8 @@ build/
 # Migrations
 .qodo
 .vercel
+
+static/uploads
+static/uploads/*
+portfolio/static/uploads
+portfolio/static/uploads/*

@@ -1,25 +1,25 @@
 # portfolio/__init__.py
 import os
 import math 
-from flask import Flask, request, render_template # request/render_template utilisés dans les handlers
+from flask import Flask, request, render_template 
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_migrate import Migrate 
-
+import logging
 from .config import Config 
 from datetime import datetime
 from dotenv import load_dotenv
 
+dotenv_path = os.path.join(os.path.dirname(__file__), '..', '.env')
+load_dotenv(dotenv_path=dotenv_path)
 
-
-dotenv_path = os.path.join(os.path.dirname(__file__), '..', '.env') 
-load_dotenv(dotenv_path=dotenv_path, verbose=False) 
-load_dotenv() 
 db = SQLAlchemy()
+
 login_manager = LoginManager()
 login_manager.login_view = 'admin.login' 
-login_manager.login_message = "Please log in to access this page." # <-- Traduit
+login_manager.login_message = "Please log in to access this page." 
 login_manager.login_message_category = 'info' 
+
 migrate = Migrate() 
 
 # --- Filtre Jinja Personnalisé ---
@@ -27,7 +27,8 @@ def filesizeformat(value, binary=False):
     """Formats the value like a 'human-readable' file size (i.e. 13 kB, 4.1 MB, 102 Bytes, etc)."""
     try:
         bytes_val = float(value)
-    except (TypeError, ValueError, AttributeError):
+    except (TypeError, ValueError, AttributeError) as e:
+         logging.warning(f"Could not format value '{value}' as filesize: {e}") 
          return "N/A" 
 
     base = 1024 if binary else 1000
@@ -52,7 +53,7 @@ def register_error_handlers(app):
         logger.warning(f"Page not found (404): {request.path}")
         try: from .models import SiteSetting; settings = {s.key: s.value for s in SiteSetting.query.all()}
         except: settings = {}
-        return render_template('404.html', site_settings=settings), 404 # Assurez-vous d'avoir templates/404.html
+        return render_template('404.html', site_settings=settings), 404 
 
     @app.errorhandler(500)
     def internal_server_error(e):
@@ -65,7 +66,7 @@ def register_error_handlers(app):
 
          try: from .models import SiteSetting; settings = {s.key: s.value for s in SiteSetting.query.all()}
          except: settings = {}
-         return render_template('500.html', site_settings=settings), 500 # Assurez-vous d'avoir templates/500.html
+         return render_template('500.html', site_settings=settings),
 
 
 # --- Application Factory ---
@@ -75,9 +76,7 @@ def create_app(config_class=Config):
     app = Flask(__name__, instance_relative_config=True) 
     app.config.from_object(config_class)
     
-    # Enregistrer les extensions Jinja
     app.jinja_env.add_extension('jinja2.ext.do') 
-    # Enregistrer notre filtre personnalisé
     app.jinja_env.filters['filesizeformat'] = filesizeformat 
 
     # print("-" * 40)
@@ -87,7 +86,7 @@ def create_app(config_class=Config):
     # print("-" * 40)
     print(f"--- VERCEL BLOB TOKEN from Config: {app.config.get('VERCEL_BLOB_RW_TOKEN')} ---")
 
-    app.logger.info(f"Configuration loaded.") # Message log plus concis
+    app.logger.info(f"Configuration loaded.")
 
     db.init_app(app)
     login_manager.init_app(app)
@@ -146,4 +145,3 @@ def create_app(config_class=Config):
 
     return app
 
-# --- FIN DU FICHIER ---

@@ -31,14 +31,14 @@ class Category(db.Model):
     __tablename__ = 'category'
     id = Column(Integer, primary_key=True)
     name = Column(String(100), unique=True, nullable=False)
-    slug = Column(String(100), unique=True, nullable=False) # Pour des URLs de filtrage éventuelles
+    slug = Column(String(100), unique=True, nullable=False) 
     
     # Relation inverse pour accéder aux projets depuis une catégorie
     projects = relationship('Project', secondary=project_categories, back_populates='categories')
 
     def __init__(self, name, **kwargs):
         super(Category, self).__init__(name=name, **kwargs)
-        if not self.slug: # Générer le slug automatiquement
+        if not self.slug: 
             # Assurez-vous que la fonction slugify est importable ici ou définissez-la
             try:
                  from .utils import slugify 
@@ -53,7 +53,7 @@ class Category(db.Model):
     
     
 class User(db.Model, UserMixin):
-    __tablename__ = 'user' # Explicit table name is good practice
+    __tablename__ = 'user' 
     id = Column(Integer, primary_key=True)
     username = Column(String(150), unique=True, nullable=False)
     password = Column(String(200), nullable=False)
@@ -67,17 +67,17 @@ class Page(db.Model):
     id = Column(Integer, primary_key=True)
     title = Column(String(255), nullable=False)
     slug = Column(String(255), unique=True, nullable=False)
-    content = Column(Text, nullable=True) # Peut être vide initialement
+    content = Column(Text, nullable=True) 
     cover_image_path = Column(String(255), nullable=True)
     display_order = Column(Integer, default=0)
     is_visible = Column(Boolean, default=True, nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    meta_description = Column(String(255), nullable=True) # Limite ~160 chars pour SEO, 255 est sûr pour DB
+    meta_description = Column(String(255), nullable=True) 
 
     def __init__(self, title, content="", **kwargs):
         super(Page, self).__init__(title=title, content=content, **kwargs)
-        if not self.slug: # Générer le slug automatiquement si non fourni
+        if not self.slug: 
              self.slug = slugify(title)
 
     def __repr__(self):
@@ -87,15 +87,15 @@ class Item(db.Model):
     """Represents a visual element (image, video?) associated with a Project."""
     __tablename__ = 'item'
     id = Column(Integer, primary_key=True)
-    file_path = Column(String(255), nullable=False) # Path relatif dans 'static/uploads/'
-    alt_text = Column(String(255), nullable=True) # Pour l'accessibilité et SEO
-    display_order = Column(Integer, default=0) # Ordre d'affichage dans un projet
+    file_path = Column(String(255), nullable=False) 
+    alt_text = Column(String(255), nullable=True) 
+    display_order = Column(Integer, default=0) 
     project_id = Column(Integer, ForeignKey('project.id', ondelete='CASCADE'), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
-    width = Column(Integer, nullable=True)       # Largeur en pixels
-    height = Column(Integer, nullable=True)      # Hauteur en pixels
-    filesize = Column(Integer, nullable=True)    # Taille en octets (bytes)
-    mime_type = Column(String(100), nullable=True) # Type MIME (ex: 'image/jpeg')
+    width = Column(Integer, nullable=True)       
+    height = Column(Integer, nullable=True)      
+    filesize = Column(Integer, nullable=True)    
+    mime_type = Column(String(100), nullable=True) 
     
     def __repr__(self):
         # Ajouter les dimensions si elles existent
@@ -106,8 +106,8 @@ class Item(db.Model):
 class SiteSetting(db.Model):
     __tablename__ = 'site_setting'
     id = Column(Integer, primary_key=True)
-    key = Column(String(50), unique=True, nullable=False) # Ex: 'site_name', 'logo_path', 'home_bg_path'
-    value = Column(Text, nullable=True) # Utiliser Text pour plus de flexibilité (ex: meta description)
+    key = Column(String(50), unique=True, nullable=False) 
+    value = Column(Text, nullable=True) 
 
     def __repr__(self):
         return f'<SiteSetting {self.key}={self.value[:20]}>'
@@ -118,14 +118,14 @@ class Project(db.Model):
     title = Column(String(255), nullable=False)
     slug = Column(String(255), unique=True, nullable=False)
     description = Column(Text, nullable=True)
-    feature_image_path = Column(String(255), nullable=True) # Image principale du projet
+    feature_image_path = Column(String(255), nullable=True) 
     
     # Metadata
     techniques = Column(String(255), nullable=True)
     year = Column(String(4), nullable=True)
-    collection = Column(String(255), nullable=True) # Si partie d'une collection/série
+    collection = Column(String(255), nullable=True) # collection/série
     status = Column(String(50), default='draft', nullable=False) # 'published', 'draft', 'archived'
-    availability = Column(String(50), default='not_for_sale', nullable=False) # 'available', 'sold', 'not_for_sale', 'on_request'
+    availability = Column(String(50), default='not_for_sale', nullable=False) # 'available', 'sold', 'not_for_sale', 'commissioned'
     display_in = Column(String(50), default='gallery', nullable=False) # 'gallery', 'commissions', 'both', 'none'
 
     # NFT Fields (nullable)
@@ -134,7 +134,7 @@ class Project(db.Model):
     contract_address = Column(String(255), nullable=True)
     token_id = Column(String(255), nullable=True)
     creator_wallet = Column(String(255), nullable=True)
-    marketplace_url = Column(String(512), nullable=True) # Lien vers OpenSea, Foundation, etc.
+    marketplace_url = Column(String(512), nullable=True) # OpenSea, Foundation, etc.
 
     # Timestamps
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -148,7 +148,7 @@ class Project(db.Model):
                          order_by='Item.display_order, Item.id', 
                          lazy='select' )
     tags = relationship('Tag', secondary=project_tags, back_populates='projects')
-    categories = relationship('Category', secondary=project_categories, back_populates='projects') # lazy='dynamic' peut être utile si beaucoup de catégories
+    categories = relationship('Category', secondary=project_categories, back_populates='projects') 
     
     @property
     def display_image_path(self):
@@ -158,20 +158,13 @@ class Project(db.Model):
         sinon retourne None.
         """
         if self.feature_image_path:
-            # Priorité à l'image principale explicitement définie
             return self.feature_image_path
         
-        # Si pas d'image principale, chercher la première Item associée
-        # Utiliser la relation triée. Accéder à self.items peut déclencher une requête si lazy='select'.
-        if self.items: # Vérifie si la liste (ou la query si dynamic) n'est pas vide
-             # self.items[0] fonctionnerait si lazy='joined' ou si déjà chargé.
-             # Pour lazy='select', cela charge tous les items. Moins optimal.
-             # Une requête ciblée est préférable si performance critique, mais essayons comme ça d'abord.
+        if self.items: 
              try:
-                 first_item = self.items[0] # Prend le premier item selon l'order_by de la relation
+                 first_item = self.items[0] 
                  return first_item.file_path
              except IndexError:
-                  # Ne devrait pas arriver si self.items est vrai, mais sécurité
                   return None
         
         # Si pas d'image principale ET pas d'items
@@ -180,11 +173,8 @@ class Project(db.Model):
 
     def __init__(self, title, **kwargs):
         super(Project, self).__init__(title=title, **kwargs)
-        if not self.slug: # Générer le slug automatiquement
+        if not self.slug: 
             self.slug = slugify(title)
-            # Gérer l'unicité du slug (ajouter un suffixe si nécessaire) - logique à affiner potentiellement
-            # base_slug = self.slug
-            # counter = 1
             # while Project.query.filter_by(slug=self.slug).first():
             #     self.slug = f"{base_slug}-{counter}"
             #     counter += 1
@@ -202,7 +192,7 @@ class Tag(db.Model):
 
     def __init__(self, name, **kwargs):
         super(Tag, self).__init__(name=name, **kwargs)
-        if not self.slug: # Générer le slug automatiquement
+        if not self.slug: 
             self.slug = slugify(name)
 
     def __repr__(self):

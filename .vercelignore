@@ -1,21 +1,52 @@
-# Ignore virtual environment
 venv/
-# Ignore local environment variables
 .env
-# Ignore Python cache
 __pycache__/
 *.pyc
-# Ignore logs and migrations
 envs/
 logs/
 migrations/
-# Ignore IDE and editor configs
 .vscode/
 .conda/
-# Ignore git directory
 .git/
-# Ignore node modules (if any)
 node_modules/
-# Ignore build artifacts
 dist/
 build/
+
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.so
+*.pyd
+
+venv/
+env/
+*.env
+instance/
+*.sqlite3
+*.db
+*.db-journal
+*.sqlite
+*.log
+logs/
+logfile.log
+.vscode/
+.idea/
+.conda/
+*.swp
+
+.DS_Store
+Thumbs.db
+*.egg
+*.egg-info/
+dist/
+build/
+*.manifest
+*.spec
+.qodo
+.vercel
+
+static/uploads
+static/uploads/*
+portfolio/static/uploads
+portfolio/static/uploads/*

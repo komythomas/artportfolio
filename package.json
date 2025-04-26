@@ -1,5 +1,5 @@
 {
   "scripts": {
-    "vercel-build": "pip install -r requirements.txt && flask db upgrade"
+    "vercel-build": "pip install -r requirements.txt"
   }
 }

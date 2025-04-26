@@ -9,7 +9,7 @@ class Config:
 
 
     SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', 'sqlite:///default_dev.db') # OK (Fallback SQLite)
-    SQLALCHEMY_TRACK_MODIFICATIONS = False # OK
+    SQLALCHEMY_TRACK_MODIFICATIONS = False 
     SQLALCHEMY_ENGINE_OPTIONS = {
         'pool_pre_ping': True,
         'pool_recycle': 1800,
@@ -17,14 +17,14 @@ class Config:
         'max_overflow': 20,
         'pool_timeout': 30,
     }
-    VERCEL_BLOB_RW_TOKEN = os.getenv('VERCEL_BLOB_RW_TOKEN', 'dev-vercel-blob-token') # OK
+    VERCEL_BLOB_RW_TOKEN = os.getenv('VERCEL_BLOB_RW_TOKEN', 'dev-vercel-blob-token') 
     
-    SQLALCHEMY_POOL_TIMEOUT = 30 # OK
-    SQLALCHEMY_POOL_RECYCLE = 1800 # OK
-    SQLALCHEMY_POOL_SIZE = 10 # OK
-    SQLALCHEMY_MAX_OVERFLOW = 20 # OK
-    SQLALCHEMY_POOL_PRE_PING = True # OK
-    SQLALCHEMY_MAX_CONNECTIONS = 20 # OK
+    SQLALCHEMY_POOL_TIMEOUT = 30 
+    SQLALCHEMY_POOL_RECYCLE = 1800 
+    SQLALCHEMY_POOL_SIZE = 10 
+    SQLALCHEMY_MAX_OVERFLOW = 20 
+    SQLALCHEMY_POOL_PRE_PING = True 
+    SQLALCHEMY_MAX_CONNECTIONS = 20 
     DEBUG = os.getenv('FLASK_DEBUG', 'False').lower() in ('true', '1', 't') 
     APP_ROOT = os.path.abspath(os.path.dirname(__file__)) 
     UPLOAD_FOLDER = os.path.join(APP_ROOT, 'static/uploads')

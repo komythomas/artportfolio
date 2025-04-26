@@ -15,6 +15,3 @@ def get_current_images():
 def inject_current_images():
     return {'current_images': get_current_images()}
 
-# Dans ton app/__init__.py ou là où tu crées l'app Flask :
-# from portfolio.context_processors import inject_current_images
-# app.context_processor(inject_current_images)
