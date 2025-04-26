@@ -97,7 +97,7 @@ def create_app(config_class=Config):
     if upload_folder: 
         if not os.path.exists(upload_folder):
             try:
-                os.makedirs(upload_folder)
+                # os.makedirs(upload_folder)
                 app.logger.info(f"Upload folder created at: {upload_folder}")
             except OSError as e:
                 app.logger.error(f"Failed to create upload folder {upload_folder}: {e}", exc_info=True)
