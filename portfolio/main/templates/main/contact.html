@@ -5,12 +5,21 @@
 {% block mobile_title %}{{ page.title }}{% endblock %}
 {% block body_class %}page-contact{% endblock %}
 
+<style>
+    /* Ajoute un padding en haut de la colonne de contenu principale sur cette page */
+    .page-contact .content-body {
+      padding-top: 1.5rem; /* Ajustez cette valeur (ex: 1rem, 2rem) si besoin */
+      margin-top: 4rem; /* Ajustez cette valeur (ex: 1rem, 2rem) si besoin */
+    }
+    . page-contact .page-cover-image {
+      margin-top: 2rem; /* Ajustez cette valeur (ex: 1rem, 2rem) si besoin */
+    }
+  </style>
 {% block content %}
 <div class="container mt-4">
     <div class="row justify-content-center">
         <div class="col-lg-9 col-md-10">
 
-            <h1 class="page-title mb-4">{{ page.title }}</h1>
 
              {% if page.cover_image_path %}
              <div class="page-cover-image mb-4 text-center">
