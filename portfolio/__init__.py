@@ -1,3 +1,4 @@
+# portfolio/__init__.py
 import os
 import math
 from flask import Flask, request, render_template
@@ -9,9 +10,16 @@ from .config import Config
 from datetime import datetime
 from dotenv import load_dotenv
 
-# Load environment variables from .env file in the project root
-dotenv_path = os.path.join(os.path.dirname(__file__), '..', '.env')
-load_dotenv(dotenv_path=dotenv_path)
+if os.getenv('VERCEL') != '1':
+    # Chemin vers le fichier .env à la racine du projet (un niveau au-dessus de portfolio/)
+    dotenv_path = os.path.join(os.path.dirname(__file__), '..', '.env')
+    if os.path.exists(dotenv_path):
+        print(f"INFO: Loading environment variables from: {dotenv_path}") # en case of running locally
+        load_dotenv(dotenv_path=dotenv_path)
+    else:
+        print(f"INFO: .env file not found at {dotenv_path}, relying on system environment variables.")
+else:
+    print("INFO: Running in Vercel environment, skipping .env loading.")
 
 db = SQLAlchemy()
 
@@ -81,7 +89,6 @@ def register_error_handlers(app):
              settings = {}
          # Return the 500 error page template
          return render_template('500.html', site_settings=settings), 500
-
 
 # --- Application Factory ---
 def create_app(config_class=Config):

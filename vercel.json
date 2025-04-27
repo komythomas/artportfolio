@@ -1,27 +1,16 @@
 {
   "version": 2,
-  "installCommand": "pip install -r requirements.txt",
   "builds": [
     {
-      "src": "portfolio/static/**",   
-      "use": "@vercel/static"        
-    },
-    {
-      "src": "wsgi.py",             
-      "use": "@vercel/python",      
-      "config": {
-        "maxLambdaSize": "15mb"
-      }
+      "src": "wsgi.py",
+      "use": "@vercel/python"
     }
   ],
   "routes": [
     {
-      "src": "/static/(.*)",        
-      "dest": "/portfolio/static/$1" 
-    },
-    {
-       "src": "/(.*)",              
-       "dest": "wsgi.py"           
+      "src": "/(.*)",
+      "dest": "wsgi.py"
     }
   ]
 }
+

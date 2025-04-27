@@ -9,7 +9,6 @@
 {{ super() }}
 {% endblock %}
 
-
 {% block content %}
 {# Utilisation de container normal pour centrer globalement la zone #}
 <div class="container my-4 my-md-5"> 
@@ -28,18 +27,6 @@
                 {{ page.content | safe if page.content else '<p>Contenu à venir...</p>' | safe }} 
             </div>
         </div> 
-
-        {# Colonne pour le portrait (apparaîtra à droite sur écrans larges) #}
-        <div class="col-lg-3 col-md-4 order-md-first order-lg-last"> 
-             <div class="artist-portrait-container sticky-top" style="top: 80px;">
-                 {% if site_settings.get('artist_portrait_path') %}
-                 <img src="{{ url_for('static', filename=site_settings.get('artist_portrait_path')) }}" 
-                      alt="Portrait de {{ site_settings.get('site_name', 'l\'artiste') }}" 
-                      class="artist-portrait-thumb"> 
-                 {% endif %}
-                 {# Vous pouvez ajouter une petite bio fixe ou autre info ici #}
-             </div>
-        </div>
 
     </div> {# Fin row #}
 </div> {# Fin container #}
