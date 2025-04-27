@@ -1,0 +1,104 @@
+{% extends "admin/base.html" %} 
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-4">
+    <h1 class="mt-4">{{ page_title }}</h1>
+    <ol class="breadcrumb mb-4">
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.dashboard') }}">Dashboard</a></li>
+        <li class="breadcrumb-item"><a href="{{ url_for('admin.list_users') }}">Manage Users</a></li>
+        <li class="breadcrumb-item active">{{ page_title }}</li>
+    </ol>
+
+    {# Section pour afficher les messages flash #}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+            <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <div class="card mb-4">
+        <div class="card-header">
+            <i class="fas fa-user-edit me-1"></i> {# Icône FontAwesome #}
+            User Details
+        </div>
+        <div class="card-body">
+            {# Le formulaire pointe vers l'action définie dans la route (create ou edit) #}
+            <form method="POST" action="{{ form_action }}">
+                {# Protection CSRF (importante !) #}
+                {{ form.hidden_tag() }}
+
+                {# Champ Username #}
+                <div class="mb-3">
+                    {{ form.username.label(class="form-label") }}
+                    {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else "")) }}
+                    {% if form.username.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.username.errors %}<span>{{ error }}</span>{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                {# Champ Password #}
+                <div class="mb-3">
+                    {{ form.password.label(class="form-label") }}
+                    {% if is_edit %}
+                        <small class="text-muted d-block mb-1">(Leave blank to keep current password)</small>
+                    {% endif %}
+                    {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else "")) }}
+                    {% if form.password.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.password.errors %}<span>{{ error }}</span>{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                {# Champ Confirm Password #}
+                <div class="mb-3">
+                    {{ form.confirm_password.label(class="form-label") }}
+                    {{ form.confirm_password(class="form-control" + (" is-invalid" if form.confirm_password.errors else "")) }}
+                    {% if form.confirm_password.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.confirm_password.errors %}<span>{{ error }}</span>{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                {# Checkbox Is Admin #}
+                <div class="mb-3 form-check">
+                    {{ form.is_admin(class="form-check-input") }}
+                    {{ form.is_admin.label(class="form-check-label") }}
+                    {% if form.is_admin.errors %}
+                        {# Afficher les erreurs pour le checkbox si nécessaire #}
+                        <div class="invalid-feedback d-block">
+                             {% for error in form.is_admin.errors %}<span>{{ error }}</span>{% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                {# Bouton Submit #}
+                <hr>
+                <div class="d-flex justify-content-end">
+                     <a href="{{ url_for('admin.list_users') }}" class="btn btn-secondary me-2">Cancel</a>
+                     {{ form.submit(class="btn btn-primary") }}
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+
+{# Optionnel: Ajouter un peu de JS pour la confirmation de suppression si vous n'utilisez pas l'attribut onsubmit #}
+{# {% block scripts %}
+   <script>
+       // Script pour la confirmation de suppression (si besoin)
+   </script>
+{% endblock %} #}
+
+{% endblock %}

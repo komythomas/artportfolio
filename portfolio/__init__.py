@@ -95,6 +95,9 @@ def create_app(config_class=Config):
     """Creates and configures the Flask application instance."""
 
     app = Flask(__name__, instance_relative_config=True)
+    template_folder='templates'
+    static_folder='static'
+
     app.config.from_object(config_class)
 
     # Add Jinja extensions and filters

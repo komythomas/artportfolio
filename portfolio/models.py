@@ -1,6 +1,7 @@
 # portfolio/models.py
 from . import db
 from flask_login import UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
 from sqlalchemy import Column, String, Integer, Text, Boolean, DateTime, ForeignKey, Table
 from sqlalchemy.orm import relationship
 from datetime import datetime
@@ -54,13 +55,33 @@ class Category(db.Model):
     
 class User(db.Model, UserMixin):
     __tablename__ = 'user' 
-    id = Column(Integer, primary_key=True)
-    username = Column(String(150), unique=True, nullable=False)
-    password = Column(String(200), nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
 
+    id = Column(Integer, primary_key=True)
+    username = Column(String(150), unique=True, nullable=False, index=True) 
+    password_hash = Column(String(256), nullable=False) 
+    created_at = Column(DateTime, default=datetime.utcnow)
+    is_admin = Column(Boolean, default=False, nullable=False)
+
+    def set_password(self, password):
+        """Crée un hash sécurisé du mot de passe et le stocke."""
+        self.password_hash = generate_password_hash(password, method='pbkdf2:sha256')
+
+    def check_password(self, password):
+        """Vérifie si le mot de passe fourni correspond au hash stocké."""
+        return check_password_hash(self.password_hash, password)
+
+    @property
+    def password(self):
+        raise AttributeError('password is not a readable attribute')
+
+    @password.setter
+    def password(self, password):
+        """Permet de définir le mot de passe via user.password = '...' """
+        self.set_password(password)
+
+    # 6. Mise à jour de la représentation pour inclure le statut admin
     def __repr__(self):
-        return f'<User {self.username}>'
+        return f'<User {self.username} (Admin: {self.is_admin})>'
 
 class Page(db.Model):
     __tablename__ = 'page'

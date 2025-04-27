@@ -10,6 +10,45 @@ from . import admin_bp
 from portfolio.models import User, Project, Page, Item, Category, Tag, SiteSetting 
 from portfolio import db, login_manager 
 from portfolio.utils import delete_file 
+from functools import wraps
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, BooleanField, SubmitField
+from wtforms.validators import DataRequired, Length, EqualTo, ValidationError, Optional # Ajouter Optional pour l'édition
+
+class UserForm(FlaskForm):
+    username = StringField(
+        'Username',
+        validators=[DataRequired(), Length(min=3, max=64)]
+    )
+    password = PasswordField(
+        'Password',
+        validators=[
+            Optional(),
+            Length(min=8, message='Password must be at least 8 characters long.')
+        ]
+    )
+    confirm_password = PasswordField(
+        'Confirm Password',
+        validators=[
+            EqualTo('password', message='Passwords must match.')
+        ]
+    )
+    is_admin = BooleanField('Is Administrator?')
+    submit = SubmitField('Save User')
+
+    def __init__(self, original_username=None, *args, **kwargs):
+        super(UserForm, self).__init__(*args, **kwargs)
+        self.original_username = original_username
+
+    # --- Méthode Corrigée ---
+    def validate_username(self, username): # 'username' est le champ WTForms
+        # Si le nom d'utilisateur a changé (édition) ou si on crée un nouvel utilisateur
+        if username.data != self.original_username:
+            # Utiliser username.data pour obtenir la valeur du champ
+            user = User.query.filter_by(username=username.data).first()
+            if user:
+                raise ValidationError('That username is already taken. Please choose a different one.')
+
 
 logger = logging.getLogger(__name__)
 
@@ -27,6 +66,19 @@ def unauthorized():
     flash("Please log in to access this page.", "warning") 
     return redirect(url_for('admin.login', next=request.endpoint)) # Passer la page demandée
 
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or not getattr(current_user, 'is_admin', False): # Vérifie l'attribut is_admin
+            logger.warning(f"Unauthorized admin access attempt by user: {current_user.username if current_user.is_authenticated else 'Anonymous'}")
+            flash("You do not have permission to access this page.", "danger")
+            if not current_user.is_authenticated:
+                return redirect(url_for('admin.login', next=request.url))
+            else:
+                return redirect(url_for('admin.dashboard')) 
+        return f(*args, **kwargs)
+    return decorated_function
+
 
 # --- Routes d'Authentification ---
 @admin_bp.route('/login', methods=['GET', 'POST'])
@@ -40,11 +92,10 @@ def login():
         password = request.form.get('password')
         remember = True if request.form.get('remember') else False
 
-        # Utiliser first() est correct ici
         user = User.query.filter_by(username=username).first() 
 
         # Vérifier l'utilisateur ET le mot de passe
-        if not user or not check_password_hash(user.password, password):
+        if not user or not user.check_password(password):
             # Message flash traduit
             flash('Incorrect username or password.', 'danger') 
             logger.warning(f"Failed login attempt for user: {username}")
@@ -78,7 +129,7 @@ def logout():
 
 # --- Routes Principales Admin ---
 @admin_bp.route('/dashboard')
-@admin_bp.route('/') # Faire pointer /admin vers le dashboard
+@admin_bp.route('/') 
 @login_required
 def dashboard():
     """Affiche le tableau de bord principal de l'admin avec des statistiques et listes."""
@@ -186,5 +237,114 @@ def delete_media_item(item_id):
 
     # Rediriger vers la page de la médiathèque (potentiellement la même page si on passe l'arg page)
     return redirect(url_for('admin.media_library', page=request.args.get('page', 1, type=int)))
+
+
+# --- Route pour la Gestion des Utilisateurs ---
+@admin_bp.route('/users')
+@login_required
+@admin_required
+def list_users():
+    try:
+        users = User.query.order_by(User.username).all()
+    except Exception as e:
+        logger.error(f"Error fetching users list: {e}", exc_info=True)
+        flash("Could not retrieve the user list due to a database error.", "danger")
+        users = []
+    # Vérifiez que cette ligne utilise bien 'admin/users_list.html'
+    return render_template('admin/user_list.html', users=users, page_title="Manage Users")
+
+@admin_bp.route('/users/new', methods=['GET', 'POST'])
+@login_required
+@admin_required 
+def create_user():
+    """Gère la création d'un nouvel utilisateur."""
+    form = UserForm() 
+    if form.validate_on_submit():
+        try:
+            new_user = User(
+                username=form.username.data,
+                is_admin=form.is_admin.data
+            )
+            new_user.set_password(form.password.data) 
+
+            db.session.add(new_user)
+            db.session.commit()
+            logger.info(f"User '{new_user.username}' created successfully by '{current_user.username}'. Admin status: {new_user.is_admin}")
+            flash(f"User '{new_user.username}' created successfully!", "success")
+            return redirect(url_for('admin.list_users'))
+        except Exception as e:
+            db.session.rollback() 
+            logger.error(f"Error creating user '{form.username.data}': {e}", exc_info=True)
+            flash(f"An error occurred while creating the user: {e}", "danger")
+
+    return render_template('admin/user_form.html', form=form, page_title="Create New User", form_action=url_for('admin.create_user'), is_edit=False)
+
+
+@admin_bp.route('/users/edit/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+@admin_required 
+def edit_user(user_id):
+    """Gère l'édition d'un utilisateur existant."""
+    user_to_edit = db.session.get(User, user_id) 
+    if not user_to_edit:
+        flash(f"User with ID {user_id} not found.", "warning")
+        return redirect(url_for('admin.list_users'))
+
+    form = UserForm(original_username=user_to_edit.username)
+
+    if form.validate_on_submit():
+        try:
+            user_to_edit.username = form.username.data
+            user_to_edit.is_admin = form.is_admin.data
+
+            if form.password.data:
+                user_to_edit.set_password(form.password.data)
+                flash(f"Password for user '{user_to_edit.username}' has been updated.", "info")
+
+            db.session.commit()
+            logger.info(f"User '{user_to_edit.username}' (ID: {user_id}) updated successfully by '{current_user.username}'.")
+            flash(f"User '{user_to_edit.username}' updated successfully!", "success")
+            return redirect(url_for('admin.list_users'))
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Error updating user '{user_to_edit.username}': {e}", exc_info=True)
+            flash(f"An error occurred while updating the user: {e}", "danger")
+
+    elif request.method == 'GET':
+        form.username.data = user_to_edit.username
+        form.is_admin.data = user_to_edit.is_admin
+
+    # Utilise le même template user_form.html, mais avec des données différentes
+    return render_template('admin/user_form.html', form=form, page_title=f"Edit User: {user_to_edit.username}", user_id=user_id, form_action=url_for('admin.edit_user', user_id=user_id), is_edit=True)
+
+
+@admin_bp.route('/users/delete/<int:user_id>', methods=['POST'])
+@login_required
+@admin_required 
+def delete_user(user_id):
+    """Delete a user."""
+    # Empêcher la suppression de soi-même
+    if user_id == current_user.id:
+        flash("You cannot delete your own account.", "danger")
+        return redirect(url_for('admin.list_users'))
+
+    user_to_delete = db.session.get(User, user_id)
+    if not user_to_delete:
+        flash(f"User with ID {user_id} not found.", "warning")
+        return redirect(url_for('admin.list_users'))
+
+    try:
+        username_deleted = user_to_delete.username 
+        db.session.delete(user_to_delete)
+        db.session.commit()
+        logger.info(f"User '{username_deleted}' (ID: {user_id}) deleted successfully by '{current_user.username}'.")
+        flash(f"User '{username_deleted}' deleted successfully!", "success")
+    except Exception as e:
+        db.session.rollback()
+        logger.error(f"Error deleting user ID {user_id}: {e}", exc_info=True)
+        flash(f"An error occurred while deleting the user: {e}", "danger")
+
+    return redirect(url_for('admin.list_users'))
+
 
 # --- FIN DU FICHIER ---
